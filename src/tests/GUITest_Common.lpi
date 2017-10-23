@@ -39,7 +39,7 @@
         <PackageName Value="FCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="5">
       <Unit0>
         <Filename Value="GUITest_Common.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -49,6 +49,21 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="TestSecurityManagerSchema"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="testbasicusermanagement.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TestBasicUserManagement"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="testcontrolsmanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TestControlsManager"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="mocksecurecontrol.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MockSecureControl"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -70,7 +85,7 @@
     </Linking>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="3">
+    <Exceptions Count="4">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -80,6 +95,9 @@
       <Item3>
         <Name Value="EFOpenError"/>
       </Item3>
+      <Item4>
+        <Name Value="EAssertionFailedError"/>
+      </Item4>
     </Exceptions>
   </Debugging>
 </CONFIG>

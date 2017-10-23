@@ -14,14 +14,33 @@ type
 
   TFPGStringList = specialize TFPGList<UTF8String>;
 
-  TBasicUserManagement = class(TComponent)
+  { TCustomBasicUserManagment }
+
+  TCustomBasicUserManagment =  class(TComponent)
+  private
+    FUsrMgnt : TUsrMgntSchema;
+    FUsrMgntInterface: TCustomUsrMgntInterface;
   protected
     //: Return the user management type.
-    function    UsrMgntType:TUsrMgntType; virtual;
+    function    UsrMgntType:TUsrMgntType; virtual; deprecated 'use UserMgnt.UsrMgntType instead';
     //: Return the user management schema (all users, groups and authorizations, if availables).
-    function    GetUserSchema:TUsrMgntSchema; virtual;
+    function    GetUserMgnt:TUsrMgntSchema; virtual;
+    function    GetUserSchema:TUsrMgntSchema; virtual; deprecated 'use GetUserMgnt instead';
+    //: Set the user management schema (all users, groups and authorizations, if availables).
+    procedure   SetUserMgnt(AValue: TUsrMgntSchema); virtual;
+    //Set the user managment interface
+    procedure SetUsrMgntInterface(AValue: TCustomUsrMgntInterface); virtual;
+    // Get or set the UserSchema
+    property UserMgnt: TUsrMgntSchema read GetUserMgnt write SetUserMgnt;
+    //
+    property UsrMgntInterface:TCustomUsrMgntInterface read FUsrMgntInterface write SetUsrMgntInterface;
+  public
+    constructor Create(AOwner:TComponent); override;
+    destructor  Destroy; override;
+  end;
+
+  TBasicUserManagement = class(TCustomBasicUserManagment)
   protected
-    FUsrMgntInterface: TCustomUsrMgntInterface;
     FLoggedUser:Boolean;
     FCurrentUserName,
     FCurrentUserLogin:String;
@@ -53,7 +72,7 @@ type
     function GetCurrentUserLogin:String; virtual;
 
     function CanAccess(sc:String; aUID:Integer):Boolean; virtual; abstract; overload;
-    procedure SetUsrMgntInterface(AValue: TCustomUsrMgntInterface);
+    procedure SetUsrMgntInterface(AValue: TCustomUsrMgntInterface); override;
 
     procedure Notification(AComponent: TComponent; Operation: TOperation);
       override;
@@ -70,7 +89,6 @@ type
     property SuccessfulLogin:TNotifyEvent read FSuccessfulLogin write FSuccessfulLogin;
     property FailureLogin:TNotifyEvent read FFailureLogin write FFailureLogin;
     property UserChanged:TUserChangedEvent read FUserChanged write FUserChanged;
-    property UsrMgntInterface:TCustomUsrMgntInterface read FUsrMgntInterface write SetUsrMgntInterface;
   public
     constructor Create(AOwner:TComponent); override;
     destructor  Destroy; override;
@@ -105,6 +123,55 @@ implementation
 
 uses security.exceptions,
      security.manager.controls_manager;
+
+{ TCustomBasicUserManagment }
+
+procedure TCustomBasicUserManagment.SetUserMgnt(AValue: TUsrMgntSchema);
+begin
+  if (AValue = FUsrMgnt) then exit; //-->>
+  // exist a schema, then remove it
+  if Assigned(FUsrMgnt) then begin
+    FreeAndNil(FUsrMgnt);
+  end;
+  FUsrMgnt:= AValue;
+end;
+
+procedure TCustomBasicUserManagment.SetUsrMgntInterface(
+  AValue: TCustomUsrMgntInterface);
+begin
+
+end;
+
+constructor TCustomBasicUserManagment.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FUsrMgnt := nil;
+end;
+
+destructor TCustomBasicUserManagment.Destroy;
+begin
+  if Assigned(FUsrMgnt) then
+    FreeAndNil(FUsrMgnt);
+  inherited Destroy;
+end;
+
+function TCustomBasicUserManagment.UsrMgntType: TUsrMgntType;
+begin
+  if Assigned(FUsrMgnt) then
+    Result := FUsrMgnt.UsrMgntType
+  else
+    Result:= TUsrMgntType.umtUnknown;
+end;
+
+function TCustomBasicUserManagment.GetUserMgnt: TUsrMgntSchema;
+begin
+  Result:= FUsrMgnt;
+end;
+
+function TCustomBasicUserManagment.GetUserSchema: TUsrMgntSchema;
+begin
+  Result:= GetUserMgnt;
+end;
 
 constructor TBasicUserManagement.Create(AOwner:TComponent);
 begin
@@ -205,16 +272,6 @@ begin
     raise EUnassignedUsrMgntIntf.Create;
 end;
 
-function TBasicUserManagement.UsrMgntType: TUsrMgntType;
-begin
-  Result:=umtUnknown;
-end;
-
-function TBasicUserManagement.GetUserSchema: TUsrMgntSchema;
-begin
-  Result:=nil;
-end;
-
 function    TBasicUserManagement.SecurityCodeExists(sc:String):Boolean;
 begin
   Result:=FRegisteredSecurityCodes.IndexOf(sc)>=0;
@@ -275,19 +332,21 @@ end;
 procedure TBasicUserManagement.SetUsrMgntInterface(
   AValue: TCustomUsrMgntInterface);
 begin
-
-  if FUsrMgntInterface=AValue then Exit;
-  if Assigned(FUsrMgntInterface) Then FUsrMgntInterface.RemoveFreeNotification(Self);
+  if UsrMgntInterface=AValue then Exit; // -->>
+  // clear notifications
+  if Assigned(UsrMgntInterface) then UsrMgntInterface.RemoveFreeNotification(Self);
   if Assigned(AValue) then AValue.FreeNotification(Self);
-  FUsrMgntInterface:=AValue;
+  // set the new value
+  inherited SetUsrMgntInterface(AValue);
+  UsrMgntInterface:=AValue;
 end;
 
 procedure TBasicUserManagement.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
-  if (Operation=opRemove) and (AComponent=FUsrMgntInterface) then
-    FUsrMgntInterface:=nil;
+  if (Operation=opRemove) and (AComponent=UsrMgntInterface) then
+    UsrMgntInterface:=nil; { TODO -oAndi : Check if only nil or we must use free }
 end;
 
 function    TBasicUserManagement.GetLoginTime:TDateTime;
