@@ -50,6 +50,7 @@ type
   private
     FSecureControls:TFPGSecureControlsList;
     FUserManagement:TBasicUserManagement;
+  protected
     procedure SetUserManagement(um:TBasicUserManagement);
   public
     constructor Create(AOwner: TComponent); override;
@@ -64,7 +65,10 @@ type
     procedure  TryAccess(sc:String);
     procedure  RegisterControl(control:ISecureControlInterface);
     procedure  UnRegisterControl(control:ISecureControlInterface);
+    function   RegisterControlCount:integer;
     procedure  UpdateControls;
+    // if the SecurityContext is empty, per deault access is allowed
+    //   the Result is only realy checked if a context is given
     function   CanAccess(sc:String):Boolean;
     procedure  ValidateSecurityCode(sc:String);
     procedure  RegisterSecurityCode(sc:String);
@@ -73,7 +77,7 @@ type
     function   GetRegisteredAccessCodes:TFPGStringList;
     function   CheckIfUserIsAllowed(sc:String; RequireUserLogin:Boolean; var userlogin:String):Boolean;
   published
-    property UserManagement:TBasicUserManagement read FUserManagement write SetUserManagement;
+    property   UserManagement:TBasicUserManagement read FUserManagement write SetUserManagement;
   end;
 
   function GetControlSecurityManager:TControlSecurityManager;
@@ -86,6 +90,7 @@ uses security.exceptions;
 constructor TControlSecurityManager.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  // Usermanagment should be nil, because nobody knows what kind of uermangement we need
   FUserManagement:=nil;
   FSecureControls:=TFPGSecureControlsList.Create;
 end;
@@ -176,6 +181,11 @@ begin
     FSecureControls.Delete(idx);
 end;
 
+function TControlSecurityManager.RegisterControlCount: integer;
+begin
+  Result:= FSecureControls.Count;
+end;
+
 procedure  TControlSecurityManager.UpdateControls;
 var
   c:LongInt;
@@ -189,10 +199,12 @@ end;
 
 function   TControlSecurityManager.CanAccess(sc:String):Boolean;
 begin
-  Result:=true;
-
-  if sc='' then exit;
-
+  { TODO -oFabio : what is the expected behavior ?}
+  Result:=false;
+  if sc='' then begin
+    Result:=true;
+    exit;
+  end;
   if (FUserManagement<>nil) and (FUserManagement is TBasicUserManagement) then
     Result:=TBasicUserManagement(FUserManagement).CanAccess(sc);
 end;

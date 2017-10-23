@@ -47,8 +47,8 @@ type
       );
   private
     LastValidUser:String;
-    MySchemaTyp: TUsrMgntType;
-    MySchema: TUsrMgntSchema;
+    //MySchemaTyp: TUsrMgntType;
+    //MySchema: TUsrMgntSchema;
   public
 
   end;
@@ -94,8 +94,8 @@ end;
 
 procedure TFormAuthBased.FormDestroy(Sender: TObject);
 begin
-  if Assigned(MySchema) then
-    FreeAndNil(MySchema);
+  //if Assigned(MySchema) then
+  //  FreeAndNil(MySchema);
 end;
 
 procedure TFormAuthBased.SecureButton1Click(Sender: TObject);
@@ -107,7 +107,7 @@ procedure TFormAuthBased.UserCustomizedUserManagement1GetSchemaType(
   var SchemaType: TUsrMgntType);
 begin
   Memo1.Append('UserCustomizedUserManagement1GetSchemaType');
-  SchemaType:= MySchemaTyp;
+  //SchemaType:= MySchemaTyp;
 end;
 
 procedure TFormAuthBased.UserCustomizedUserManagement1GetUserName(
@@ -121,7 +121,7 @@ procedure TFormAuthBased.UserCustomizedUserManagement1GetUserSchema(
 begin
   // Only used if OnManageUsersANdGroups not set !!
   Memo1.Append('UserCustomizedUserManagement1GetUserSchema');
-  Schema:= MySchema;
+  //Schema:= MySchema;
 end;
 
 procedure TFormAuthBased.UserCustomizedUserManagement1Logout(Sender: TObject);
@@ -164,6 +164,7 @@ begin
   Memo1.Clear;
   Memo1.Append('Create and build Schema');
   //BuildSchemaUser(MySchemaTyp, MySchema);
+  GetControlSecurityManager.UserManagement;
   BuildSchemaUser(MySchemaTyp, MySchema);
   Memo1.Append('-------------------------');
   Memo1.Append('Login as Username/Password');
