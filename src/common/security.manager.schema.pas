@@ -135,6 +135,7 @@ type
 
   TAuthorizedUser = class(TCustomUser)
   private
+    function GetAuthorizationByID(AuthID:Integer):TAuthorization;
     function GetAuthorization(aIndex: Integer): TAuthorization;
     function GetAuthorizationByName(AuthorizationName: UTF8String
       ): TAuthorization;
@@ -151,6 +152,7 @@ type
     property AuthorizationCount:Integer read GetAuthorizationCount;
     property Authorization[Index:Integer]:TAuthorization read GetAuthorization;
     property AuthorizationByName[AuthorizationName:UTF8String]:TAuthorization read GetAuthorizationByName;
+    property AuthorizationByID[AuthID:Integer]:TAuthorization read GetAuthorizationByID;
   end;
 
   //: Implements a list of users with specific authorizations
@@ -424,13 +426,16 @@ end;
 function TUsrAuthSchema.GetUserByName(aLogin: UTF8String): TCustomUser;
 var
   i: Integer;
+  AuxResult: TAuthorizedUser;
 begin
   Result:=nil;
   if assigned(FUserList) then
     for i:= 0 to FUserList.Count-1 do begin
-       Result:= FUserList.Data[i];
-       if SameStr(aLogin,Result.Login) then
+       AuxResult:= FUserList.Data[i];
+       if SameStr(aLogin,AuxResult.Login) then begin
+         Result:=AuxResult;
          break;
+       end;
     end; // for
 end;
 
@@ -440,7 +445,7 @@ var
 begin
   Result:=nil;
   if assigned(FUserList) and FUserList.Find(aUID, aKeyIdx) then
-    Result := FUserList.KeyData[FUserList.Keys[aUID]];
+    Result := FUserList.KeyData[FUserList.Keys[aKeyIdx]];
 end;
 
 function TUsrAuthSchema.GetUserCount: Integer;
@@ -452,6 +457,7 @@ constructor TUsrAuthSchema.Create;
 begin
   inherited Create;
   FUserList:=TAuthorizedUserList.Create;
+  FUserList.Sorted:=true;
 end;
 
 destructor TUsrAuthSchema.Destroy;
@@ -588,6 +594,15 @@ end;
 
 { TAuthorizedUser }
 
+function TAuthorizedUser.GetAuthorizationByID(AuthID: Integer): TAuthorization;
+var
+  aux: Integer;
+begin
+  Result:=nil;
+  if assigned(FUserAuthorizations) and FUserAuthorizations.Find(AuthID, aux) then
+    result := FUserAuthorizations.KeyData[FUserAuthorizations.Keys[aux]];
+end;
+
 function TAuthorizedUser.GetAuthorization(aIndex: Integer): TAuthorization;
 begin
   Result:=nil;
@@ -599,13 +614,16 @@ function TAuthorizedUser.GetAuthorizationByName(AuthorizationName: UTF8String
   ): TAuthorization;
 var
   i: Integer;
+  AuxResult: TAuthorization;
 begin
   Result:=nil;
   if assigned(FUserAuthorizations) then
     for i:= 0 to FUserAuthorizations.Count-1 do begin
-       Result:= FUserAuthorizations.Data[i];
-       if SameStr(AuthorizationName,Result.Description) then
+       AuxResult:= FUserAuthorizations.Data[i];
+       if SameStr(AuthorizationName,AuxResult.Description) then begin
+         Result:=AuxResult;
          break;
+       end;
     end; // for
 end;
 
@@ -619,6 +637,7 @@ constructor TAuthorizedUser.Create(aUID: Integer; aUserLogin, aUserPassword,
 begin
   inherited Create(aUID,aUserLogin,aUserPassword,aUserDescription,aBlockedUser);
   FUserAuthorizations:=TAuthorizationList.Create;
+  FUserAuthorizations.Sorted:=true;
 end;
 
 constructor TAuthorizedUser.Create(aUID: Integer; aUserLogin,
