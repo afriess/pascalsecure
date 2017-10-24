@@ -11,7 +11,7 @@ uses
 type
   TsecureAddUser = class(TForm)
     ButtonPanel1: TButtonPanel;
-    UserEnabled: TCheckBox;
+    UserBlocked: TCheckBox;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
@@ -20,10 +20,14 @@ type
     usrLogin: TEdit;
     Label1: TLabel;
     usrFullName: TEdit;
+    procedure ButtonPanel1Click(Sender: TObject);
   private
-
-  public
-
+    FValidateAddDialog: TNotifyEvent;
+  protected
+    FValidadeAddDialog: TNotifyEvent;
+    procedure ValidateAdd; virtual;
+  published
+    property ValidadeAddDialog:TNotifyEvent read FValidateAddDialog write FValidadeAddDialog;
   end;
 
 var
@@ -32,6 +36,17 @@ var
 implementation
 
 {$R *.lfm}
+
+procedure TsecureAddUser.ButtonPanel1Click(Sender: TObject);
+begin
+  ValidateAdd;
+end;
+
+procedure TsecureAddUser.ValidateAdd;
+begin
+  if Assigned(FValidadeAddDialog) then
+    FValidadeAddDialog(Self);
+end;
 
 end.
 

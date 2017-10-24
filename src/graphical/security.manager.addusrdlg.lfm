@@ -90,17 +90,16 @@ object secureAddUser: TsecureAddUser
     CancelButton.Name = 'CancelButton'
     CancelButton.DefaultCaption = True
     TabOrder = 5
+    OnClick = ButtonPanel1Click
     ShowButtons = [pbOK, pbCancel]
   end
-  object UserEnabled: TCheckBox
+  object UserBlocked: TCheckBox
     Left = 160
     Height = 27
     Top = 24
     Width = 150
     AutoSize = False
-    Caption = 'En&abled'
-    Checked = True
-    State = cbChecked
+    Caption = 'User &blocked'
     TabOrder = 1
   end
 end

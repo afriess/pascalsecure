@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ActnList, security.actions.login, security.controls.SecureButton,
+  ActnList, Spin, security.actions.login, security.controls.SecureButton,
   security.manager.graphical_user_management, security.actions.manage,
   security.manager.custom_user_management, security.manager.schema;
 

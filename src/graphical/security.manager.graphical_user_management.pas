@@ -13,6 +13,7 @@ uses
   StdCtrls, ComCtrls,
   sysutils, math, strutils,
   security.manager.schema,
+  security.exceptions,
   security.manager.custom_usrmgnt_interface,
   security.manager.basic_user_management;
 
@@ -81,6 +82,7 @@ type
       const aUser: TUserWithLevelAccess);
     procedure LevelChangeUserPassClick(Sender: TObject;
       const aUser: TUserWithLevelAccess);
+    procedure LevelValidateAddUser(Sender: TObject);
   protected
     frmLogin:TSecureCustomFrmLogin;
     FCanCloseLogin:Boolean;
@@ -100,20 +102,30 @@ type
     function  LoginVisibleBetweenRetries:Boolean; override;
   end;
 
+  EInvalidUserDataException = class(ESecurityException)
+  public
+    constructor Create;
+  end;
+
 ResourceString
-  strFrmLoginCaption   = 'PascalSecure Login';
-  strUserLogin         = '&Login';
-  strUserPass          = '&Password';
-  SSpecialLoginCaption = 'Enter a user that can access the "%s" token.';
-  strYes               = 'Yes';
-  strNo                = 'No';
+  strFrmLoginCaption     = 'PascalSecure Login';
+  strUserLogin           = '&Login';
+  strUserPass            = '&Password';
+  SSpecialLoginCaption   = 'Enter a user that can access the "%s" token.';
+  strYes                 = 'Yes';
+  strNo                  = 'No';
+  strInvalidDataSupplied = 'Invalid user data';
 
 implementation
 
 uses security.manager.controls_manager,
-     security.exceptions,
      security.manager.level.mgntdlg,
      security.manager.level.addusrdlg, Dialogs;
+
+constructor EInvalidUserDataException.Create;
+begin
+  inherited Create(strInvalidDataSupplied);
+end;
 
 { TFrmLogin }
 
@@ -245,8 +257,32 @@ begin
 end;
 
 procedure TGraphicalUsrMgntInterface.LevelAddUserClick(Sender: TObject);
+var
+  frm: TsecureLevelAddUser;
 begin
+  if not (FCurrentUserSchema is TUsrLevelMgntSchema) then
+    raise EInvalidUsrMgntSchema.Create;
 
+  frm:=TsecureLevelAddUser.Create(Self);
+  try
+    frm.UserBlocked.Checked:=false;
+    frm.usrLogin.Text:='';
+    frm.usrFullName.Text:='';
+    frm.usrPassword.Text:='';
+    frm.usrConfirmPassword.Text:='';
+    with FCurrentUserSchema as TUsrLevelMgntSchema do begin
+      if MinLevel=AdminLevel then
+        frm.secureUserLevel.Value:=MaxLevel
+      else
+        frm.secureUserLevel.Value:=MinLevel;
+    end;
+    frm.ValidadeAddDialog:=@LevelValidateAddUser;
+    if frm.ShowModal=mrOK then begin
+
+    end;
+  finally
+    FreeAndNil(frm);
+  end;
 end;
 
 procedure TGraphicalUsrMgntInterface.LevelBlockUserClick(Sender: TObject;
@@ -265,6 +301,15 @@ procedure TGraphicalUsrMgntInterface.LevelChangeUserPassClick(Sender: TObject;
   const aUser: TUserWithLevelAccess);
 begin
 
+end;
+
+procedure TGraphicalUsrMgntInterface.LevelValidateAddUser(Sender: TObject);
+begin
+  if Sender is TsecureLevelAddUser then
+    with Sender as TsecureLevelAddUser do begin
+      if SameText(Trim(usrLogin.Text), '') or SameText(usrPassword.Text, '') or SameText(usrConfirmPassword.Text, '') or (not SameText(usrPassword.Text, usrConfirmPassword.Text)) then
+        raise EInvalidUserDataException.Create;
+    end;
 end;
 
 procedure TGraphicalUsrMgntInterface.CanCloseLogin(Sender: TObject;

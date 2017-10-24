@@ -74,7 +74,19 @@ type
     constructor Create;
   end;
 
+  EInvalidUsrMgntSchema = class(ESecurityException)
+    constructor Create;
+  end;
+
 implementation
+
+
+{ EInvalidUsrMgntSchema }
+
+constructor EInvalidUsrMgntSchema.Create;
+begin
+  inherited Create(SInvalidUserMgntSchema);
+end;
 
 { EUnknownUserMgntSchema }
 
