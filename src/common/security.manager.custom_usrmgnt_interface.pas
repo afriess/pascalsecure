@@ -47,28 +47,38 @@ type
 
 implementation
 
+{$ifdef debug_secure}
+uses
+  LazLogger;
+{$endif}
+
 function TCustomUsrMgntInterface.CanLogout: Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=True;
 end;
 
 procedure TCustomUsrMgntInterface.FreezeUserLogin;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
 
 end;
 
 procedure TCustomUsrMgntInterface.UnfreezeUserLogin;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
 
 end;
 
 procedure TCustomUsrMgntInterface.ProcessMessages;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
 
 end;
 
 function TCustomUsrMgntInterface.LoginVisibleBetweenRetries: Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=false;
 end;
 

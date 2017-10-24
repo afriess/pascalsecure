@@ -50,6 +50,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
+        <CommandLineParams Value="--debug-log=log.txt"/>
       </local>
     </RunParams>
     <RequiredPackages Count="2">
@@ -60,7 +61,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="8">
+    <Units Count="9">
       <Unit0>
         <Filename Value="LoginLvlBased.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -96,6 +97,11 @@
         <Filename Value="..\..\src\common\security.manager.custom_usrmgnt_interface.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit7>
+      <Unit8>
+        <Filename Value="..\..\src\common\security.manager.securecontrolinterface.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="security.manager.SecureControlInterface"/>
+      </Unit8>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -136,6 +142,9 @@
         </Win32>
       </Options>
     </Linking>
+    <Other>
+      <CustomOptions Value="-ddebug_secure"/>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

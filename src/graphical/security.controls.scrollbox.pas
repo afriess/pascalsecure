@@ -7,7 +7,8 @@ interface
 uses
   Classes,
   Forms,
-  security.manager.controls_manager;
+  security.manager.controls_manager,
+  security.manager.SecureControlInterface;
 
 type
 

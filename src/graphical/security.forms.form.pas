@@ -9,6 +9,7 @@ uses
   Controls,
   Classes,
   security.manager.controls_manager,
+  security.manager.SecureControlInterface,
   security.exceptions;
 
 type

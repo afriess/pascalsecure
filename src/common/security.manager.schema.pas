@@ -348,27 +348,35 @@ type
 
 implementation
 
-uses security.exceptions;
+uses
+  {$ifdef debug_secure}
+  LazLogger,
+  {$endif}
+  security.exceptions;
 
 { TUsrMgntSchema }
 
 class function TUsrMgntSchema.UsrMgntType: TUsrMgntType;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:= umtUnknown;
 end;
 
 function TUsersGroup.AddUser(const aUser: TAuthorizedUser): Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=AddCustomUser(aUser);
 end;
 
 function TSimpleUserGroup.AddUser(const aUser: TSimpleUser): Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=AddCustomUser(aUser);
 end;
 
 constructor TGroupAuthSchema.Create;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create;
   FUserList:=TUserList.Create;
   FGroupList:=TSimpleUserGroupList.Create;
@@ -376,6 +384,7 @@ end;
 
 destructor TGroupAuthSchema.Destroy;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FreeAndNil(FGroupList);
   FreeAndNil(FUserList);
   inherited Destroy;
@@ -383,43 +392,51 @@ end;
 
 class function TGroupAuthSchema.UsrMgntType: TUsrMgntType;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:= TUsrMgntType.umtAuthorizationByGroup;
 end;
 
 function TGroupAuthSchema.UserList: TUserList;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FUserList;
 end;
 
 function TGroupAuthSchema.GroupList: TSimpleUserGroupList;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FGroupList;
 end;
 
 constructor TUsrGroupAuthSchema.Create;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create;
   FGroupList:=TUsrGroupList.Create;
 end;
 
 destructor TUsrGroupAuthSchema.Destroy;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FreeAndNil(FGroupList);
   inherited Destroy;
 end;
 
 class function TUsrGroupAuthSchema.UsrMgntType: TUsrMgntType;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:= TUsrMgntType.umtAuthorizationByUserAndGroup;
 end;
 
 function TUsrGroupAuthSchema.GroupList: TUsrGroupList;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FGroupList;
 end;
 
 function TUsrAuthSchema.GetUser(aIndex: Integer): TCustomUser;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
   if assigned(FUserList) and (aIndex<FUserList.Count) then
     result := FUserList.KeyData[FUserList.Keys[aIndex]];
@@ -430,6 +447,7 @@ var
   i: Integer;
   AuxResult: TAuthorizedUser;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
   if assigned(FUserList) then
     for i:= 0 to FUserList.Count-1 do begin
@@ -445,6 +463,7 @@ function TUsrAuthSchema.GetUserByUID(aUID: Integer): TCustomUser;
 var
   aKeyIdx: Integer;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
   if assigned(FUserList) and FUserList.Find(aUID, aKeyIdx) then
     Result := FUserList.KeyData[FUserList.Keys[aKeyIdx]];
@@ -452,11 +471,13 @@ end;
 
 function TUsrAuthSchema.GetUserCount: Integer;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FUserList.Count;
 end;
 
 constructor TUsrAuthSchema.Create;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create;
   FUserList:=TAuthorizedUserList.Create;
   FUserList.Sorted:=true;
@@ -464,34 +485,40 @@ end;
 
 destructor TUsrAuthSchema.Destroy;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FreeAndNil(FUserList);
   inherited Destroy;
 end;
 
 class function TUsrAuthSchema.UsrMgntType: TUsrMgntType;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:= TUsrMgntType.umtAuthorizationByUser;
 end;
 
 function TUsrAuthSchema.UserList: TAuthorizedUserList;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FUserList;
 end;
 
 constructor TAuthBasedUsrMgntSchema.Create;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create;
   FAuthorizations:=TAuthorizations.Create;
 end;
 
 destructor TAuthBasedUsrMgntSchema.Destroy;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FreeAndNil(FAuthorizations);
   inherited Destroy;
 end;
 
 function TAuthBasedUsrMgntSchema.Autorizations: TAuthorizations;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FAuthorizations;
 end;
 
@@ -500,6 +527,7 @@ var
   i: Integer;
   AuxResult: TUserWithLevelAccess;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
   if assigned(FUserLevelList) then
     for i:= 0 to FUserLevelList.Count-1 do begin
@@ -514,6 +542,7 @@ end;
 constructor TUsrLevelMgntSchema.Create(aMinLevel, aMaxLevel,
   aAdminLevel: Integer);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create;
   FAdminLevel:=aAdminLevel;
   FUserLevelList:=TUserLevelList.Create;
@@ -527,6 +556,7 @@ destructor TUsrLevelMgntSchema.Destroy;
 var
   i: LongInt;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   for i:=FUserLevelList.Count-1 downto 0 do begin
     FUserLevelList.KeyData[FUserLevelList.Keys[i]].Destroy;
     FUserLevelList.Delete(i);
@@ -537,17 +567,20 @@ end;
 
 class function TUsrLevelMgntSchema.UsrMgntType: TUsrMgntType;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:= TUsrMgntType.umtLevel;
 end;
 
 function TUsrLevelMgntSchema.UserList: TUserLevelList;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FUserLevelList;
 end;
 
 
 function TCustomGroup.GetUser(aIndex: Integer): TCustomUser;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
   if assigned(FUserList) and (aIndex<FUserList.Count) then
     result := FUserList.KeyData[FUserList.Keys[aIndex]];
@@ -557,6 +590,7 @@ function TCustomGroup.GetUserByUID(aUID: Integer): TCustomUser;
 var
   aKeyIdx: Integer;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
   if assigned(FUserList) and FUserList.Find(aUID, aKeyIdx) then
     Result := FUserList.KeyData[FUserList.Keys[aUID]];
@@ -564,6 +598,7 @@ end;
 
 function TCustomGroup.GetUserCount: Integer;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FUserList.Count;
 end;
 
@@ -571,6 +606,7 @@ function TCustomGroup.AddCustomUser(const aUser: TCustomUser): Boolean;
 var
   InsertAtIdx, i: Integer;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=false;
   if Assigned(FUserList) and Assigned(aUser) then begin
     InsertAtIdx:=-1;
@@ -591,6 +627,7 @@ end;
 
 constructor TCustomGroup.Create(aGID: Integer; aGroupName: UTF8String);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create;
   FUserList:=TUserList.Create;
   FAuthorizations:=TAuthorizationList.Create;
@@ -600,6 +637,7 @@ end;
 
 destructor TCustomGroup.Destroy;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FreeAndNil(FUserList);
   FreeAndNil(FAuthorizations);
   inherited Destroy;
@@ -607,6 +645,7 @@ end;
 
 function TCustomGroup.GroupAuthorizations: TAuthorizationList;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FAuthorizations;
 end;
 
@@ -616,6 +655,7 @@ function TAuthorizedUser.GetAuthorizationByID(AuthID: Integer): TAuthorization;
 var
   aux: Integer;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
   if assigned(FUserAuthorizations) and FUserAuthorizations.Find(AuthID, aux) then
     result := FUserAuthorizations.KeyData[FUserAuthorizations.Keys[aux]];
@@ -623,6 +663,7 @@ end;
 
 function TAuthorizedUser.GetAuthorization(aIndex: Integer): TAuthorization;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
   if assigned(FUserAuthorizations) and (aIndex<FUserAuthorizations.Count) then
     result := FUserAuthorizations.KeyData[FUserAuthorizations.Keys[aIndex]];
@@ -634,6 +675,7 @@ var
   i: Integer;
   AuxResult: TAuthorization;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
   if assigned(FUserAuthorizations) then
     for i:= 0 to FUserAuthorizations.Count-1 do begin
@@ -647,12 +689,14 @@ end;
 
 function TAuthorizedUser.GetAuthorizationCount: Integer;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FUserAuthorizations.Count;
 end;
 
 constructor TAuthorizedUser.Create(aUID: Integer; aUserLogin, aUserPassword,
   aUserDescription: UTF8String; aBlockedUser: Boolean);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create(aUID,aUserLogin,aUserPassword,aUserDescription,aBlockedUser);
   FUserAuthorizations:=TAuthorizationList.Create;
   FUserAuthorizations.Sorted:=true;
@@ -661,18 +705,21 @@ end;
 constructor TAuthorizedUser.Create(aUID: Integer; aUserLogin,
   aUserDescription: UTF8String; aBlockedUser: Boolean);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Create(aUID,aUserLogin, '',aUserDescription,aBlockedUser);
 end;
 
 
 destructor TAuthorizedUser.Destroy;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FreeAndNil(FUserAuthorizations);
   inherited Destroy;
 end;
 
 function TAuthorizedUser.AuthorizationList: TAuthorizationList;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FUserAuthorizations;
 end;
 
@@ -681,6 +728,7 @@ end;
 function TAuthorizations.AddAuthorization(aAuthID: Integer;
   aDescription: UTF8String): TAuthorization;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=TAuthorization.Create(aAuthID, aDescription);
   Add(aAuthID, Result);
 end;
@@ -689,6 +737,7 @@ end;
 
 constructor TAuthorization.Create(aAuthID: Integer; aDescription: UTF8String);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create;
   FAuthID:=aAuthID;
   FDescription:=aDescription;
@@ -698,6 +747,7 @@ end;
 
 procedure TUserWithLevelAccess.SetUserLevel(AValue: Integer);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if FUserLevel=AValue then Exit;
   FUserLevel:=AValue;
 end;
@@ -705,12 +755,14 @@ end;
 constructor TUserWithLevelAccess.Create(aUID: Integer; aUserLogin,
   aUserDescription: UTF8String; aBlockedUser: Boolean; aUserLevel: Integer);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Create(aUID, aUserLogin, '', aUserDescription, aBlockedUser, aUserLevel);
 end;
 
 constructor TUserWithLevelAccess.Create(aUID: Integer; aUserLogin, aUserPassword,
   aUserDescription: UTF8String; aBlockedUser: Boolean; aUserLevel: Integer);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create(aUID, aUserLogin, aUserPassword, aUserDescription, aBlockedUser);
   FUserLevel:=aUserLevel;
   FOldUserLevel:=aUserLevel;
@@ -718,11 +770,13 @@ end;
 
 function TUserWithLevelAccess.Modified: Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   result := inherited Modified or (FUserLevel<>FOldUserLevel)
 end;
 
 procedure TUserWithLevelAccess.ResetModified;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited;
   FOldUserLevel := FUserLevel;
 end;
@@ -731,6 +785,7 @@ end;
 
 procedure TCustomUser.SetBlockedUser(AValue: Boolean);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if FBlockedUser=AValue then Exit;
   FOldUserState:=FBlockedUser;
   FBlockedUser:=AValue;
@@ -738,6 +793,7 @@ end;
 
 procedure TCustomUser.SetUserPassword(AValue: UTF8String);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if FUserPassword=AValue then Exit;
   FOldUserPassword:= FUserPassword;
   FUserPassword:=AValue;
@@ -745,6 +801,7 @@ end;
 
 procedure TCustomUser.SetUserDescription(AValue: UTF8String);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if FUserDescription=AValue then Exit;
   FOldUserDescription:=FUserDescription;
   FUserDescription:=AValue;
@@ -753,6 +810,7 @@ end;
 constructor TCustomUser.Create(aUID: Integer; aUserLogin, aUserPassword,
   aUserDescription: UTF8String; aBlockedUser: Boolean);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create;
   FUID:=aUID;
   FUserLogin:=aUserLogin;
@@ -770,17 +828,20 @@ end;
 constructor TCustomUser.Create(aUID: Integer; aUserLogin,
   aUserDescription: UTF8String; aBlockedUser: Boolean);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Create(aUID, aUserLogin, '', aUserDescription, aBlockedUser);
 end;
 
 function TCustomUser.Modified: Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result := (FUserDescription<>FOldUserDescription) or (FBlockedUser<>FOldUserState)
             or (FUserPassword <> FOldUserPassword);
 end;
 
 procedure TCustomUser.ResetModified;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FOldUserDescription:=FUserDescription;
   FOldUserPassword:= FUserPassword;
   FOldUserState:=FBlockedUser;

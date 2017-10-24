@@ -7,7 +7,8 @@ interface
 uses
   Classes,
   MaskEdit,
-  security.manager.controls_manager;
+  security.manager.controls_manager,
+  security.manager.SecureControlInterface;
 
 type
 

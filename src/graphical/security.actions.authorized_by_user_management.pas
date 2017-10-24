@@ -6,7 +6,8 @@ interface
 
 uses
   ActnList, Classes, SysUtils,
-  security.manager.controls_manager;
+  security.manager.controls_manager,
+  security.manager.SecureControlInterface;
 
 type
 

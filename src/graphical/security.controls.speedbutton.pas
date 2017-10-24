@@ -8,7 +8,8 @@ uses
   StdCtrls,
   Classes,
   Buttons,
-  security.manager.controls_manager;
+  security.manager.controls_manager,
+  security.manager.SecureControlInterface;
 
 type
 

@@ -86,11 +86,18 @@ type
 
 implementation
 
+  {$ifdef debug_secure}
+uses
+  LazLogger;
+  {$endif}
+
+
 { TUserCustomizedUserManagement }
 
 function TUserCustomizedUserManagement.CheckUserAndPassword(User,
   Pass: String; var UserID: Integer; LoginAction: Boolean): Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=false;
   try
     if Assigned(FCheckUserAndPasswordEvent) then
@@ -102,6 +109,7 @@ end;
 
 function TUserCustomizedUserManagement.GetCurrentUserName: String;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:='';
   if FLoggedUser then
     try
@@ -114,6 +122,7 @@ end;
 
 function TUserCustomizedUserManagement.GetCurrentUserLogin: String;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:='';
   if FLoggedUser then
     try
@@ -127,6 +136,7 @@ end;
 function TUserCustomizedUserManagement.CanAccess(sc: String; aUID: Integer
   ): Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=(Trim(sc)='');
   if aUID>=0 then
     try
@@ -139,6 +149,7 @@ end;
 
 function TUserCustomizedUserManagement.UsrMgntType: TUsrMgntType;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=umtUnknown;
   if Assigned(FGetUserSchemaType) then
     FGetUserSchemaType(Result);
@@ -146,6 +157,7 @@ end;
 
 function TUserCustomizedUserManagement.GetUserSchema: TUsrMgntSchema;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
   if Assigned(FGetUserSchema) then
     FGetUserSchema(Result);
@@ -153,6 +165,7 @@ end;
 
 procedure TUserCustomizedUserManagement.Logout;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Logout;
   if Assigned(FLogoutEvent) then
     try
@@ -163,6 +176,7 @@ end;
 
 procedure TUserCustomizedUserManagement.Manage;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FManageUsersAndGroupsEvent) then
     FManageUsersAndGroupsEvent(Self)
   else
@@ -171,18 +185,21 @@ end;
 
 procedure TUserCustomizedUserManagement.ValidateSecurityCode(sc: String);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FValidadeSecurityCode) then
     FValidadeSecurityCode(sc);
 end;
 
 procedure TUserCustomizedUserManagement.RegisterSecurityCode(sc: String);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FRegisterSecurityCode) then
     FRegisterSecurityCode(sc);
 end;
 
 function TUserCustomizedUserManagement.CanAccess(sc: String): Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=(Trim(sc)='');
   if FLoggedUser then
     try

@@ -8,7 +8,8 @@ uses
   Forms,
   Controls,
   Classes,
-  security.manager.controls_manager;
+  security.manager.controls_manager,
+  security.manager.SecureControlInterface;
 
 type
 

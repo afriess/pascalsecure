@@ -118,9 +118,14 @@ ResourceString
 
 implementation
 
-uses security.manager.controls_manager,
-     security.manager.level.mgntdlg,
-     security.manager.level.addusrdlg, Dialogs;
+uses
+  {$ifdef debug_secure}
+  LazLogger,
+  {$endif}
+  security.manager.controls_manager,
+  security.manager.level.mgntdlg,
+  security.manager.level.addusrdlg,
+  Dialogs;
 
 constructor EInvalidUserDataException.Create;
 begin
@@ -131,38 +136,45 @@ end;
 
 function TSecureFrmLogin.GetUserLogin: String;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=edtLogin.Text;
 end;
 
 procedure TSecureFrmLogin.CancelClicked(Sender: TObject);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FOnCancelClick) then
     FOnCancelClick(Sender)
 end;
 
 function TSecureFrmLogin.GetUserPassword: String;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=edtPassword.Text;
 end;
 
 procedure TSecureFrmLogin.OKClicked(Sender: TObject);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FOnOKClick) then
     FOnOKClick(Sender);
 end;
 
 procedure TSecureFrmLogin.SetUserLogin(AValue: String);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   edtLogin.Text:=AValue;
 end;
 
 procedure TSecureFrmLogin.SetUserPassword(AValue: String);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   edtPassword.Text:=AValue;
 end;
 
 procedure TSecureFrmLogin.SetFocusedControl(AValue: TSecureFocusedControl);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if CanFocus then
     case AValue of
       fcUserName: if edtLogin.Enabled and edtLogin.CanFocus then edtLogin.SetFocus;
@@ -174,12 +186,14 @@ end;
 
 procedure TSecureFrmLogin.DoShow;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited DoShow;
   SetFocusedControl(FFocusedControl);
 end;
 
 constructor TSecureFrmLogin.CreateNew(AOwner: TComponent; Num: Integer);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited CreateNew(AOwner,Num);
   BorderStyle:=bsDialog;
   SetBounds(0,0,300,150);
@@ -222,6 +236,7 @@ end;
 
 procedure TSecureFrmLogin.EnableEntry;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   edtPassword.Enabled:=true;
   edtLogin.Enabled:=true;
   btnButtons.Enabled:=true;
@@ -230,6 +245,7 @@ end;
 
 procedure TSecureFrmLogin.DisableEntry;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   edtPassword.Enabled:=false;
   edtLogin.Enabled:=false;
   btnButtons.Enabled:=false;
@@ -241,6 +257,7 @@ procedure TGraphicalUsrMgntInterface.OKClick(Sender: TObject);
 var
   aUID:Integer;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FCanCloseLogin:=false;
   if not Assigned(frmLogin) then exit;
   FCanCloseLogin:=GetControlSecurityManager.Login(frmLogin.GetUserLogin,frmLogin.GetUserPassword, aUID);
@@ -253,6 +270,7 @@ end;
 
 function TGraphicalUsrMgntInterface.GetLoginClass: TSecureCustomFrmLoginClass;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=TSecureFrmLogin;
 end;
 
@@ -260,6 +278,7 @@ procedure TGraphicalUsrMgntInterface.LevelAddUserClick(Sender: TObject);
 var
   frm: TsecureLevelAddUser;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if not (FCurrentUserSchema is TUsrLevelMgntSchema) then
     raise EInvalidUsrMgntSchema.Create;
 
@@ -288,23 +307,27 @@ end;
 procedure TGraphicalUsrMgntInterface.LevelBlockUserClick(Sender: TObject;
   const aUser: TUserWithLevelAccess);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
 
 end;
 
 procedure TGraphicalUsrMgntInterface.LevelChangeUserClick(Sender: TObject;
   const aUser: TUserWithLevelAccess);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
 
 end;
 
 procedure TGraphicalUsrMgntInterface.LevelChangeUserPassClick(Sender: TObject;
   const aUser: TUserWithLevelAccess);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
 
 end;
 
 procedure TGraphicalUsrMgntInterface.LevelValidateAddUser(Sender: TObject);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Sender is TsecureLevelAddUser then
     with Sender as TsecureLevelAddUser do begin
       if SameText(Trim(usrLogin.Text), '') or SameText(usrPassword.Text, '') or SameText(usrConfirmPassword.Text, '') or (not SameText(usrPassword.Text, usrConfirmPassword.Text)) then
@@ -315,11 +338,13 @@ end;
 procedure TGraphicalUsrMgntInterface.CanCloseLogin(Sender: TObject;
   var CanClose: boolean);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   CanClose:=FCanCloseLogin;
 end;
 
 procedure TGraphicalUsrMgntInterface.CancelClick(Sender: TObject);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FCanCloseLogin:=true;
 end;
 
@@ -328,6 +353,7 @@ function TGraphicalUsrMgntInterface.Login(out aLogin, aPass: UTF8String
 var
   afrmLogin: TSecureCustomFrmLogin;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   afrmLogin:=GetLoginClass.CreateNew(Application);
   try
     Result:=afrmLogin.ShowModal=mrOK;
@@ -342,6 +368,7 @@ end;
 
 function TGraphicalUsrMgntInterface.Login: Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(frmLogin) then begin
     Result:=false;
     frmLogin.ShowOnTop;
@@ -366,6 +393,7 @@ end;
 
 function TGraphicalUsrMgntInterface.CanLogout: Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=true;
 end;
 
@@ -388,6 +416,7 @@ var
   end;
 
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   //allows one user management...
   if (not Assigned(FCurrentUserSchema)) and Assigned(aSchema) then begin
     FCurrentUserSchema:=aSchema;
@@ -450,11 +479,13 @@ end;
 
 procedure TGraphicalUsrMgntInterface.FreezeUserLogin;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(frmLogin) then frmLogin.DisableEntry;
 end;
 
 procedure TGraphicalUsrMgntInterface.UnfreezeUserLogin;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(frmLogin) then frmLogin.EnableEntry;
 end;
 
@@ -467,6 +498,7 @@ end;
 
 function TGraphicalUsrMgntInterface.LoginVisibleBetweenRetries: Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=true;
 end;
 

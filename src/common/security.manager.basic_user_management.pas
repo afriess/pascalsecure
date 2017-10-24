@@ -121,13 +121,18 @@ type
 
 implementation
 
-uses security.exceptions,
-     security.manager.controls_manager;
+uses
+  {$ifdef debug_secure}
+  LazLogger,
+  {$endif}
+  security.exceptions,
+  security.manager.controls_manager;
 
 { TCustomBasicUserManagment }
 
 procedure TCustomBasicUserManagment.SetUserMgnt(AValue: TUsrMgntSchema);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if (AValue = FUsrMgnt) then exit; //-->>
   // exist a schema, then remove it
   if Assigned(FUsrMgnt) then begin
@@ -139,17 +144,20 @@ end;
 procedure TCustomBasicUserManagment.SetUsrMgntInterface(
   AValue: TCustomUsrMgntInterface);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
 
 end;
 
 constructor TCustomBasicUserManagment.Create(AOwner: TComponent);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create(AOwner);
   FUsrMgnt := nil;
 end;
 
 destructor TCustomBasicUserManagment.Destroy;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FUsrMgnt) then
     FreeAndNil(FUsrMgnt);
   inherited Destroy;
@@ -157,6 +165,7 @@ end;
 
 function TCustomBasicUserManagment.UsrMgntType: TUsrMgntType;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FUsrMgnt) then
     Result := FUsrMgnt.UsrMgntType
   else
@@ -165,16 +174,19 @@ end;
 
 function TCustomBasicUserManagment.GetUserMgnt: TUsrMgntSchema;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:= FUsrMgnt;
 end;
 
 function TCustomBasicUserManagment.GetUserSchema: TUsrMgntSchema;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:= GetUserMgnt;
 end;
 
 constructor TBasicUserManagement.Create(AOwner:TComponent);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create(AOwner);
 
   if GetControlSecurityManager.UserManagement=nil then
@@ -193,6 +205,7 @@ end;
 
 destructor  TBasicUserManagement.Destroy;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if GetControlSecurityManager.UserManagement=Self then
     GetControlSecurityManager.UserManagement:=nil;
 
@@ -203,6 +216,7 @@ end;
 
 function TBasicUserManagement.Login: Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=false;
   if Assigned(FUsrMgntInterface) then
     Result:=FUsrMgntInterface.Login
@@ -214,6 +228,7 @@ function TBasicUserManagement.Login(Userlogin, userpassword: String; var UID:Int
 var
   AFreezeStarted: TDateTime;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=CheckUserAndPassword(Userlogin, userpassword, UID, true);
   if Result then begin
     FLoggedUser:=true;
@@ -247,6 +262,7 @@ end;
 
 procedure   TBasicUserManagement.Logout;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if (not Assigned(FUsrMgntInterface)) or (FUsrMgntInterface.CanLogout) then begin
     FLoggedUser:=false;
     FCurrentUserName:='';
@@ -261,6 +277,7 @@ procedure TBasicUserManagement.Manage;
 var
   schema: TUsrMgntSchema;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FUsrMgntInterface) then begin
     schema:=GetUserSchema;
     try
@@ -274,23 +291,27 @@ end;
 
 function    TBasicUserManagement.SecurityCodeExists(sc:String):Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FRegisteredSecurityCodes.IndexOf(sc)>=0;
 end;
 
 procedure   TBasicUserManagement.RegisterSecurityCode(sc:String);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Not SecurityCodeExists(sc) then
     FRegisteredSecurityCodes.Add(sc);
 end;
 
 procedure   TBasicUserManagement.UnregisterSecurityCode(sc:String);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if SecurityCodeExists(sc) then
     FRegisteredSecurityCodes.Delete(FRegisteredSecurityCodes.IndexOf(sc));
 end;
 
 function TBasicUserManagement.GetRegisteredAccessCodes: TFPGStringList;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=TFPGStringList.Create;
   Result.Assign(FRegisteredSecurityCodes);
 end;
@@ -301,6 +322,7 @@ var
   aLogin, aPass:UTF8String;
   aUserID: Integer;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   //if current user has the authorization, avoid open the dialog that will
   //asks by other user allowed
   if UserLogged and CanAccess(sc) and (RequireUserLogin=false) then begin
@@ -326,12 +348,14 @@ end;
 
 function TBasicUserManagement.GetUID: Integer;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FUID;
 end;
 
 procedure TBasicUserManagement.SetUsrMgntInterface(
   AValue: TCustomUsrMgntInterface);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if FUsrMgntInterface=AValue then Exit; // -->>
   // clear notifications
   if Assigned(FUsrMgntInterface) then FUsrMgntInterface.RemoveFreeNotification(Self);
@@ -344,6 +368,7 @@ end;
 procedure TBasicUserManagement.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Notification(AComponent, Operation);
   if (Operation=opRemove) and (AComponent=UsrMgntInterface) then
     UsrMgntInterface:=nil; { TODO -oAndi : Check if only nil or we must use free }
@@ -351,6 +376,7 @@ end;
 
 function    TBasicUserManagement.GetLoginTime:TDateTime;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if FLoggedUser then
     Result:=FLoggedSince
   else
@@ -359,38 +385,45 @@ end;
 
 procedure TBasicUserManagement.SetInactiveTimeOut(AValue: Cardinal);
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FInactiveTimeOut:=AValue;
 end;
 
 function TBasicUserManagement.GetLoggedUser:Boolean;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FLoggedUser;
 end;
 
 function TBasicUserManagement.GetCurrentUserName:String;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FCurrentUserName;
 end;
 
 function TBasicUserManagement.GetCurrentUserLogin:String;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FCurrentUserLogin;
 end;
 
 procedure TBasicUserManagement.DoSuccessfulLogin;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FSuccessfulLogin) then
     FSuccessfulLogin(Self);
 end;
 
 procedure TBasicUserManagement.DoFailureLogin;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FFailureLogin) then
     FFailureLogin(Self);
 end;
 
 procedure TBasicUserManagement.DoUserChanged;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FUserChanged) then
     try
       FUserChanged(Self, FCurrentUserLogin, GetCurrentUserLogin);
