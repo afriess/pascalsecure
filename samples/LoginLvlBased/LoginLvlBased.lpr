@@ -7,7 +7,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, frmmainauth, ubuildschema
+  Forms, frmmainlvl, ubuildschemalvl, security.manager.basic_user_management,
+  security.manager.controls_manager, security.manager.schema
   { you can add units after this };
 
 {$R *.res}

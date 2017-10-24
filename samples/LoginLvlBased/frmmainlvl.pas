@@ -47,8 +47,6 @@ type
       );
   private
     LastValidUser:String;
-    //MySchemaTyp: TUsrMgntType;
-    //MySchema: TUsrMgntSchema;
   public
 
   end;
@@ -59,7 +57,7 @@ var
 implementation
 
 uses
-  security.manager.controls_manager, ubuildschema, strutils;
+  security.manager.controls_manager, ubuildschemalvl, strutils;
 
 {$R *.lfm}
 
@@ -77,8 +75,8 @@ begin
   ValidUser:= False;
   LastValidUser:= '';
   { TODO -oAndi : This should be easier to handle}
-  if TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrAuthSchema then begin
-     aUser := TUsrAuthSchema(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[user];
+  if TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrLevelMgntSchema then begin
+     aUser := TUsrLevelMgntSchema(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[user];
      if aUser <> nil then
         ValidUser:= SameStr(aUser.Password,pass);
   end;
@@ -146,8 +144,8 @@ begin
   CanAccess:= False;
   { TODO -oAndi : This should be easier to handle}
   //check if the current user can access the securityCode
-  if TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrAuthSchema then begin
-     aUser := TAuthorizedUser(TUsrAuthSchema(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[LastValidUser]);
+  if TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrLevelMgntSchema then begin
+     aUser := TAuthorizedUser(TUsrLevelMgntSchema(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[LastValidUser]);
      if aUser <> nil then
        CanAccess:= (aUser.AuthorizationByName[securityCode] <> nil);
   end;
@@ -164,7 +162,7 @@ procedure TFormAuthBased.FormCreate(Sender: TObject);
 begin
   Memo1.Clear;
   Memo1.Append('Create and build Schema');
-  BuildSchemaUser;
+  BuildSchemaLVL;
   Memo1.Append('-------------------------');
   Memo1.Append('Login as Username/Password');
   Memo1.Append('   root     1');

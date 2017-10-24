@@ -234,10 +234,12 @@ type
     FMinLevel: Integer;
     FAdminLevel: Integer;
     FUserLevelList:TUserLevelList;
+    function GetUserByName(aLogin: UTF8String): TCustomUser;
   public
     constructor Create(aMinLevel, aMaxLevel, aAdminLevel:Integer);
     destructor Destroy; override;
     class function UsrMgntType:TUsrMgntType; override;
+    property UserByName[UserName:UTF8String]:TCustomUser read GetUserByName;
   published
     function UserList:TUserLevelList;
     property AdminLevel:Integer read FAdminLevel;
@@ -491,6 +493,22 @@ end;
 function TAuthBasedUsrMgntSchema.Autorizations: TAuthorizations;
 begin
   Result:=FAuthorizations;
+end;
+
+function TUsrLevelMgntSchema.GetUserByName(aLogin: UTF8String): TCustomUser;
+var
+  i: Integer;
+  AuxResult: TUserWithLevelAccess;
+begin
+  Result:=nil;
+  if assigned(FUserLevelList) then
+    for i:= 0 to FUserLevelList.Count-1 do begin
+       AuxResult:= FUserLevelList.Data[i];
+       if SameStr(aLogin,AuxResult.Login) then begin
+         Result:=AuxResult;
+         break;
+       end;
+    end; // for
 end;
 
 constructor TUsrLevelMgntSchema.Create(aMinLevel, aMaxLevel,

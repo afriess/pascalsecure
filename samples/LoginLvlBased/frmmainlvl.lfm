@@ -4,7 +4,7 @@ object FormAuthBased: TFormAuthBased
   Top = 0
   Width = 873
   ActiveControl = SecureButton1
-  Caption = 'User Authentication'
+  Caption = 'User Level'
   ClientHeight = 401
   ClientWidth = 873
   OnCreate = FormCreate
