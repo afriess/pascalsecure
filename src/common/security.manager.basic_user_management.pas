@@ -332,13 +332,13 @@ end;
 procedure TBasicUserManagement.SetUsrMgntInterface(
   AValue: TCustomUsrMgntInterface);
 begin
-  if UsrMgntInterface=AValue then Exit; // -->>
+  if FUsrMgntInterface=AValue then Exit; // -->>
   // clear notifications
-  if Assigned(UsrMgntInterface) then UsrMgntInterface.RemoveFreeNotification(Self);
+  if Assigned(FUsrMgntInterface) then FUsrMgntInterface.RemoveFreeNotification(Self);
   if Assigned(AValue) then AValue.FreeNotification(Self);
   // set the new value
   inherited SetUsrMgntInterface(AValue);
-  UsrMgntInterface:=AValue;
+  FUsrMgntInterface:=AValue;
 end;
 
 procedure TBasicUserManagement.Notification(AComponent: TComponent;

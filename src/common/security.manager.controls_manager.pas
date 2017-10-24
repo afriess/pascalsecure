@@ -49,8 +49,8 @@ type
   TControlSecurityManager = class(TComponent)
   private
     FSecureControls:TFPGSecureControlsList;
-    FUserManagement:TBasicUserManagement;
   protected
+    FUserManagement:TBasicUserManagement;
     procedure SetUserManagement(um:TBasicUserManagement);
   public
     constructor Create(AOwner: TComponent); override;
@@ -157,8 +157,9 @@ begin
   if (um<>nil) and (not (um is TBasicUserManagement)) then
     raise EInvalidUserManagementComponent.Create;
 
-  if (um<>nil) and (FUserManagement<>nil) then
-    raise EUserManagementIsSet.Create;
+  { TODO -oAndi : why check we this ? }
+  //if (um<>nil) and (FUserManagement<>nil) then
+  //  raise EUserManagementIsSet.Create;
 
   FUserManagement:=um;
   UpdateControls;

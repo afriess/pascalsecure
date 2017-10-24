@@ -68,8 +68,9 @@ type
 
     property SuccessfulLogin;
     property FailureLogin;
+    property UserMgnt;
     property UsrMgntInterface;
-  published
+   published
     property OnCheckUserAndPass    :TCheckUserAndPasswordEvent read FCheckUserAndPasswordEvent write FCheckUserAndPasswordEvent;
     property OnGetUserName         :TGetUserNameAndLogin       read FGetUserName               write FGetUserName;
     property OnGetUserLogin        :TGetUserNameAndLogin       read FGetUserLogin              write FGetUserLogin;
