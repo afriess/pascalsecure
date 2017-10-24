@@ -51,6 +51,7 @@ type
     FSecureControls:TFPGSecureControlsList;
   protected
     FUserManagement:TBasicUserManagement;
+  protected
     procedure SetUserManagement(um:TBasicUserManagement);
   public
     constructor Create(AOwner: TComponent); override;
