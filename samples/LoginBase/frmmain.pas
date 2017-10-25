@@ -25,7 +25,6 @@ type
     LoginAction1: TLoginAction;
     ManageUsersAndGroupsAction1: TManageUsersAndGroupsAction;
     Memo1: TMemo;
-    CustomizedUserManagement1: TUserCustomizedUserManagement;
     SecureButton1: TSecureButton;
     SecureButton2: TSecureButton;
     UserCustomizedUserManagement1: TUserCustomizedUserManagement;
@@ -106,12 +105,16 @@ end;
 
 procedure TForm1.UserCustomizedUserManagement1GetUserSchema(
   var Schema: TUsrMgntSchema);
+var
+  aLvlMgntIntf:IUsrLevelMgntInterface;
 begin
-  Schema:=TUsrLevelMgntSchema.Create(1, 100, 1, CustomizedUserManagement1 as IUsrLevelMgntInterface);
-  with Schema as TUsrLevelMgntSchema do begin
-    UserList.Add(0,TUserWithLevelAccess.Create(0,'root','Main administrator',false, 1));
-    UserList.Add(1,TUserWithLevelAccess.Create(1,'andi','A user',            false, 1));
-    UserList.Add(2,TUserWithLevelAccess.Create(2,'user','Another user',      false, 10));
+  if Supports(UserCustomizedUserManagement1, IUsrLevelMgntInterface, aLvlMgntIntf) then begin
+    Schema:=TUsrLevelMgntSchema.Create(1, 100, 1, aLvlMgntIntf);
+    with Schema as TUsrLevelMgntSchema do begin
+      UserList.Add(0,TUserWithLevelAccess.Create(0,'root','Main administrator',false, 1));
+      UserList.Add(1,TUserWithLevelAccess.Create(1,'andi','A user',            false, 1));
+      UserList.Add(2,TUserWithLevelAccess.Create(2,'user','Another user',      false, 10));
+    end;
   end;
 end;
 

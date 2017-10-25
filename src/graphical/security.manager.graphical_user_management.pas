@@ -282,15 +282,16 @@ var
   frm: TsecureLevelAddUser;
   aUID: Integer;
   aLvlObj, usr: TUserWithLevelAccess;
+  a, b, c, d: Boolean;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if (not Assigned(FCurrentUserSchema)) or
-     (not (FCurrentUserSchema is TUsrLevelMgntSchema)) or
-     (not Assigned(TUsrLevelMgntSchema(FCurrentUserSchema).LevelInterface)) or
-     (not Assigned(lvlfrm)) then
+  a:=Assigned(FCurrentUserSchema);
+  b:=(FCurrentUserSchema is TUsrLevelMgntSchema);
+  c:=Supports(TUsrLevelMgntSchema(FCurrentUserSchema).LevelInterface, IUsrLevelMgntInterface);
+  d:=Assigned(lvlfrm);
+
+  if (a=false) or (b=false) or (c=false) or (d=false) then
     raise EInvalidUsrMgntSchema.Create;
-
-
 
   frm:=TsecureLevelAddUser.Create(lvlfrm);
   try

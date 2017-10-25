@@ -9,7 +9,6 @@ object Form1: TForm1
   ClientWidth = 873
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '1.9.0.0'
   object SecureButton1: TSecureButton
     AnchorSideLeft.Control = BuLogout
     AnchorSideLeft.Side = asrBottom
