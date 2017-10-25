@@ -3,12 +3,6 @@ inherited secureLevelAddUser: TsecureLevelAddUser
   Height = 340
   Top = 250
   ClientHeight = 340
-  inherited ButtonPanel1: TButtonPanel
-    Top = 292
-  end
-  inherited UserBlocked: TCheckBox
-    Width = 152
-  end
   object Label5: TLabel[10]
     Left = 8
     Height = 17

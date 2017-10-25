@@ -44,6 +44,9 @@ type
       var SchemaType: TUsrMgntType);
     procedure UserCustomizedUserManagement1GetUserSchema(
       var Schema: TUsrMgntSchema);
+    procedure UserCustomizedUserManagement1LevelAddUser(const UserLogin,
+      UserDescription, PlainPassword: UTF8String; const aUsrLevel: Integer;
+      const aBlocked: Boolean; out aUID: Integer; out Result: Boolean);
     procedure UserCustomizedUserManagement1Logout(Sender: TObject);
   private
     LastValidUser:String;
@@ -116,6 +119,14 @@ begin
       UserList.Add(2,TUserWithLevelAccess.Create(2,'user','Another user',      false, 10));
     end;
   end;
+end;
+
+procedure TForm1.UserCustomizedUserManagement1LevelAddUser(const UserLogin,
+  UserDescription, PlainPassword: UTF8String; const aUsrLevel: Integer;
+  const aBlocked: Boolean; out aUID: Integer; out Result: Boolean);
+begin
+  ShowMessage('Add in your database, file or something else...');
+  Result:=true;
 end;
 
 procedure TForm1.UserCustomizedUserManagement1Logout(Sender: TObject);

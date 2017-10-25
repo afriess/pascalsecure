@@ -111,6 +111,11 @@ type
     constructor Create;
   end;
 
+  EPasswordsDontMatch = class(ESecurityException)
+  public
+    constructor Create;
+  end;
+
 ResourceString
   strFrmLoginCaption     = 'PascalSecure Login';
   strUserLogin           = '&Login';
@@ -119,6 +124,7 @@ ResourceString
   strYes                 = 'Yes';
   strNo                  = 'No';
   strInvalidDataSupplied = 'Invalid user data';
+  strPasswordsDontMatch  = 'Supplied passwords don''t math!';
 
 implementation
 
@@ -129,6 +135,11 @@ uses
   security.manager.controls_manager,
   security.manager.level.addusrdlg,
   Dialogs;
+
+constructor EPasswordsDontMatch.Create;
+begin
+  inherited Create(strPasswordsDontMatch);
+end;
 
 constructor EInvalidUserDataException.Create;
 begin
@@ -360,8 +371,10 @@ begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Sender is TsecureLevelAddUser then
     with Sender as TsecureLevelAddUser do begin
-      if SameText(Trim(usrLogin.Text), '') or SameText(usrPassword.Text, '') or SameText(usrConfirmPassword.Text, '') or (not SameText(usrPassword.Text, usrConfirmPassword.Text)) then
+      if SameText(Trim(usrLogin.Text), '') or SameText(usrPassword.Text, '') or SameText(usrConfirmPassword.Text, '') then
         raise EInvalidUserDataException.Create;
+      if (not SameText(usrPassword.Text, usrConfirmPassword.Text)) then
+        raise EPasswordsDontMatch.Create;
     end;
 end;
 
@@ -371,6 +384,7 @@ procedure TGraphicalUsrMgntInterface.LevelCreateUserEntry(
 var
   item: TListItem;
 begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(aListView) and Assigned(usr) then begin
     item:=aListView.Items.add;
     item.Caption:=usr.Login;

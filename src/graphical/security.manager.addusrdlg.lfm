@@ -76,6 +76,15 @@ object secureAddUser: TsecureAddUser
     TabOrder = 4
     Text = 'usrConfirmPassword'
   end
+  object UserBlocked: TCheckBox
+    Left = 160
+    Height = 27
+    Top = 24
+    Width = 150
+    AutoSize = False
+    Caption = 'User &blocked'
+    TabOrder = 1
+  end
   object ButtonPanel1: TButtonPanel
     Left = 6
     Height = 42
@@ -90,16 +99,6 @@ object secureAddUser: TsecureAddUser
     CancelButton.Name = 'CancelButton'
     CancelButton.DefaultCaption = True
     TabOrder = 5
-    OnClick = ButtonPanel1Click
     ShowButtons = [pbOK, pbCancel]
-  end
-  object UserBlocked: TCheckBox
-    Left = 160
-    Height = 27
-    Top = 24
-    Width = 150
-    AutoSize = False
-    Caption = 'User &blocked'
-    TabOrder = 1
   end
 end

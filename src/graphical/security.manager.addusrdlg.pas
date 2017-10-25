@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ButtonPanel, ComCtrls, Spin;
+  ButtonPanel, ComCtrls, Spin, ExtCtrls, Buttons;
 
 type
   TsecureAddUser = class(TForm)
@@ -20,12 +20,12 @@ type
     usrLogin: TEdit;
     Label1: TLabel;
     usrFullName: TEdit;
-    procedure ButtonPanel1Click(Sender: TObject);
   private
     FValidateAddDialog: TNotifyEvent;
   protected
     FValidadeAddDialog: TNotifyEvent;
-    procedure ValidateAdd; virtual;
+    function ValidAdd:Boolean; virtual;
+    function CloseQuery: boolean; override;
   published
     property ValidadeAddDialog:TNotifyEvent read FValidateAddDialog write FValidadeAddDialog;
   end;
@@ -37,15 +37,24 @@ implementation
 
 {$R *.lfm}
 
-procedure TsecureAddUser.ButtonPanel1Click(Sender: TObject);
+function TsecureAddUser.ValidAdd: Boolean;
 begin
-  ValidateAdd;
+  Result:=false;
+  try
+    if Assigned(FValidadeAddDialog) then
+      FValidadeAddDialog(Self);
+    Result:=true;
+  except
+    on e:Exception do begin
+      Result:=false;
+      Application.ShowException(e);
+    end;
+  end;
 end;
 
-procedure TsecureAddUser.ValidateAdd;
+function TsecureAddUser.CloseQuery: boolean;
 begin
-  if Assigned(FValidadeAddDialog) then
-    FValidadeAddDialog(Self);
+  Result:=ValidAdd and inherited CloseQuery;
 end;
 
 end.
