@@ -26,7 +26,7 @@ type
 
   { TUserCustomizedUserManagement }
 
-  TUserCustomizedUserManagement = class(TBasicUserManagement)
+  TUserCustomizedUserManagement = class(TBasicUserManagement, IUsrLevelMgntInterface)
   private
     FCheckUserAndPasswordEvent:TCheckUserAndPasswordEvent;
     FGetUserName              :TGetUserNameAndLogin;
@@ -48,6 +48,25 @@ type
 
     function UsrMgntType: TUsrMgntType; override;
     function GetUserSchema: TUsrMgntSchema; override;
+  protected
+    function LevelAddUser(const UserLogin, UserDescription, PlainPassword:UTF8String;
+                          const aUsrLevel:Integer;
+                          const aBlocked:Boolean;
+                          out   aUID:Integer;
+                          out   aUsrObject:TUserWithLevelAccess):Boolean;
+
+    function LevelDelUser(Const aUsrObject:TUserWithLevelAccess):Boolean;
+
+    function LevelUpdateUser(const aUsrObject:TUserWithLevelAccess;
+                             const aUserDescription, aPlainPassword:UTF8String;
+                             const aUsrLevel:Integer;
+                             const aBlocked:Boolean):Boolean;
+
+    function LevelBlockUser(const aUsrObject:TUserWithLevelAccess;
+                            const aBlocked:Boolean):Boolean;
+
+    function LevelChangeUserPass(const aUsrObject:TUserWithLevelAccess;
+                                 const aPlainPassword:UTF8String):Boolean;
   public
     procedure Logout; override;
     procedure Manage; override;
@@ -161,6 +180,41 @@ begin
   Result:=nil;
   if Assigned(FGetUserSchema) then
     FGetUserSchema(Result);
+end;
+
+function TUserCustomizedUserManagement.LevelAddUser(const UserLogin,
+  UserDescription, PlainPassword: UTF8String; const aUsrLevel: Integer;
+  const aBlocked: Boolean; out aUID: Integer; out
+  aUsrObject: TUserWithLevelAccess): Boolean;
+begin
+
+end;
+
+function TUserCustomizedUserManagement.LevelDelUser(
+  const aUsrObject: TUserWithLevelAccess): Boolean;
+begin
+
+end;
+
+function TUserCustomizedUserManagement.LevelUpdateUser(
+  const aUsrObject: TUserWithLevelAccess; const aUserDescription,
+  aPlainPassword: UTF8String; const aUsrLevel: Integer; const aBlocked: Boolean
+  ): Boolean;
+begin
+
+end;
+
+function TUserCustomizedUserManagement.LevelBlockUser(
+  const aUsrObject: TUserWithLevelAccess; const aBlocked: Boolean): Boolean;
+begin
+
+end;
+
+function TUserCustomizedUserManagement.LevelChangeUserPass(
+  const aUsrObject: TUserWithLevelAccess; const aPlainPassword: UTF8String
+  ): Boolean;
+begin
+
 end;
 
 procedure TUserCustomizedUserManagement.Logout;

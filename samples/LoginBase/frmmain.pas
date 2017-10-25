@@ -107,7 +107,7 @@ end;
 procedure TForm1.UserCustomizedUserManagement1GetUserSchema(
   var Schema: TUsrMgntSchema);
 begin
-  Schema:=TUsrLevelMgntSchema.Create(1, 100, 1);
+  Schema:=TUsrLevelMgntSchema.Create(1, 100, 1, CustomizedUserManagement1 as IUsrLevelMgntInterface);
   with Schema as TUsrLevelMgntSchema do begin
     UserList.Add(0,TUserWithLevelAccess.Create(0,'root','Main administrator',false, 1));
     UserList.Add(1,TUserWithLevelAccess.Create(1,'andi','A user',            false, 1));

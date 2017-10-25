@@ -7,14 +7,13 @@ inherited secureUsrLvlMgnt: TsecureUsrLvlMgnt
   ClientWidth = 798
   Position = poScreenCenter
   inherited ButtonPanel1: TButtonPanel
-    Height = 41
-    Top = 423
+    Top = 422
     Width = 786
     TabOrder = 2
   end
   object ListView1: TListView[1]
     Left = 0
-    Height = 381
+    Height = 380
     Top = 36
     Width = 798
     Align = alClient

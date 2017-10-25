@@ -14,23 +14,23 @@ type
 
   IUsrLevelMgntInterface = interface
     ['{E3103A23-FFAE-4286-8565-C41038285EEF}']
-    function AddUser(const UserLogin, UserDescription, PlainPassword:UTF8String;
+    function LevelAddUser(const UserLogin, UserDescription, PlainPassword:UTF8String;
                      const UsrLevel:Integer;
                      const Blocked:Boolean;
                      out   UID:Integer;
                      out   UsrObject:TUserWithLevelAccess):Boolean;
 
-    function DelUser(Const UsrObject:TUserWithLevelAccess):Boolean;
+    function LevelDelUser(Const UsrObject:TUserWithLevelAccess):Boolean;
 
-    function UpdateUser(const UsrObject:TUserWithLevelAccess;
+    function LevelUpdateUser(const UsrObject:TUserWithLevelAccess;
                         const UserDescription, PlainPassword:UTF8String;
                         const UsrLevel:Integer;
                         const Blocked:Boolean):Boolean;
 
-    function BlockUser(const UsrObject:TUserWithLevelAccess;
+    function LevelBlockUser(const UsrObject:TUserWithLevelAccess;
                        const Blocked:Boolean):Boolean;
 
-    function ChangeUserPass(const UsrObject:TUserWithLevelAccess;
+    function LevelChangeUserPass(const UsrObject:TUserWithLevelAccess;
                             const PlainPassword:UTF8String):Boolean;
 
   end;
@@ -206,9 +206,6 @@ type
   TUsrGroupList = specialize TFPGMap<Integer, TUsersGroup>;
 
   //: Implements the entire user management schema.
-
-  { TUsrMgntSchema }
-
   TUsrMgntSchema = class(TObject)
   public
     class function UsrMgntType:TUsrMgntType; virtual;
@@ -225,23 +222,22 @@ type
   This schema is similar to the security system used in Elipse SCADA
   and in Wonderware Intouch.
   }
-
-  { TUsrLevelMgntSchema }
-
   TUsrLevelMgntSchema = class(TUsrMgntSchema)
   protected
     FMaxLevel: Integer;
     FMinLevel: Integer;
     FAdminLevel: Integer;
     FUserLevelList:TUserLevelList;
+    FLevelInterface:IUsrLevelMgntInterface;
     function GetUserByName(aLogin: UTF8String): TCustomUser;
   public
-    constructor Create(aMinLevel, aMaxLevel, aAdminLevel:Integer);
+    constructor Create(aMinLevel, aMaxLevel, aAdminLevel:Integer; LvlMgntIntf:IUsrLevelMgntInterface);
     destructor Destroy; override;
     class function UsrMgntType:TUsrMgntType; override;
     property UserByName[UserName:UTF8String]:TCustomUser read GetUserByName;
   published
     function UserList:TUserLevelList;
+    function LevelInterface:IUsrLevelMgntInterface;
     property AdminLevel:Integer read FAdminLevel;
     property MinLevel:Integer read FMinLevel;
     property MaxLevel:Integer read FMaxLevel;
@@ -540,7 +536,7 @@ begin
 end;
 
 constructor TUsrLevelMgntSchema.Create(aMinLevel, aMaxLevel,
-  aAdminLevel: Integer);
+  aAdminLevel: Integer; LvlMgntIntf: IUsrLevelMgntInterface);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create;
@@ -550,6 +546,7 @@ begin
     raise EInvalidLevelRanges.Create(aMinLevel,aMaxLevel);
   FMinLevel:=aMinLevel;
   FMaxLevel:=aMaxLevel;
+  FLevelInterface:=LvlMgntIntf;
 end;
 
 destructor TUsrLevelMgntSchema.Destroy;
@@ -575,6 +572,11 @@ function TUsrLevelMgntSchema.UserList: TUserLevelList;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FUserLevelList;
+end;
+
+function TUsrLevelMgntSchema.LevelInterface: IUsrLevelMgntInterface;
+begin
+  Result:=FLevelInterface;
 end;
 
 

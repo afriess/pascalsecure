@@ -33,6 +33,7 @@ type
     procedure ListView1SelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
   private
+    FLevelLength: Integer;
     FOnAddUserClick: TNotifyEvent;
     FOnBlockUserClick: TSecureLvlUsrMgntNotifyEvent;
     FOnChangeUserClick: TSecureLvlUsrMgntNotifyEvent;
@@ -40,11 +41,13 @@ type
     FOnDelUserClick: TSecureLvlUsrMgntNotifyEvent;
     procedure ValidateSelectedUser(const aUser: TListItem);
   published
+    property LevelLength:Integer                               read FLevelLength          write FLevelLength;
     property OnAddUserClick:TNotifyEvent                       read FOnAddUserClick       write FOnAddUserClick;
     property OnDelUserClick:TSecureLvlUsrMgntNotifyEvent       read FOnDelUserClick       write FOnDelUserClick;
     property OnBlockUserClick:TSecureLvlUsrMgntNotifyEvent     read FOnBlockUserClick     write FOnBlockUserClick;
     property OnChangeUserClick:TSecureLvlUsrMgntNotifyEvent    read FOnChangeUserClick    write FOnChangeUserClick;
     property OnChangeUsrPassClick:TSecureLvlUsrMgntNotifyEvent read FOnChangeUsrPassClick write FOnChangeUsrPassClick;
+
   end;
 
   ESecurityInvalidUserSelected = class(ESecurityException)

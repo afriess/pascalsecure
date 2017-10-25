@@ -15,7 +15,8 @@ uses
   security.manager.schema,
   security.exceptions,
   security.manager.custom_usrmgnt_interface,
-  security.manager.basic_user_management;
+  security.manager.basic_user_management,
+  security.manager.level.mgntdlg;
 
 type
 
@@ -83,8 +84,11 @@ type
     procedure LevelChangeUserPassClick(Sender: TObject;
       const aUser: TUserWithLevelAccess);
     procedure LevelValidateAddUser(Sender: TObject);
+    procedure LevelCreateUserEntry(const aListView: TListView;
+      const usr: TUserWithLevelAccess; const lvlLength: Integer);
   protected
     frmLogin:TSecureCustomFrmLogin;
+    lvlfrm:TsecureUsrLvlMgnt;
     FCanCloseLogin:Boolean;
     FCurrentUserSchema:TUsrMgntSchema;
     procedure CanCloseLogin(Sender: TObject; var CanClose: boolean);
@@ -123,7 +127,6 @@ uses
   LazLogger,
   {$endif}
   security.manager.controls_manager,
-  security.manager.level.mgntdlg,
   security.manager.level.addusrdlg,
   Dialogs;
 
@@ -277,12 +280,19 @@ end;
 procedure TGraphicalUsrMgntInterface.LevelAddUserClick(Sender: TObject);
 var
   frm: TsecureLevelAddUser;
+  aUID: Integer;
+  aLvlObj, usr: TUserWithLevelAccess;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if not (FCurrentUserSchema is TUsrLevelMgntSchema) then
+  if (not Assigned(FCurrentUserSchema)) or
+     (not (FCurrentUserSchema is TUsrLevelMgntSchema)) or
+     (not Assigned(TUsrLevelMgntSchema(FCurrentUserSchema).LevelInterface)) or
+     (not Assigned(lvlfrm)) then
     raise EInvalidUsrMgntSchema.Create;
 
-  frm:=TsecureLevelAddUser.Create(Self);
+
+
+  frm:=TsecureLevelAddUser.Create(lvlfrm);
   try
     frm.UserBlocked.Checked:=false;
     frm.usrLogin.Text:='';
@@ -297,7 +307,26 @@ begin
     end;
     frm.ValidadeAddDialog:=@LevelValidateAddUser;
     if frm.ShowModal=mrOK then begin
+      with TUsrLevelMgntSchema(FCurrentUserSchema) do begin
+        if LevelInterface.LevelAddUser(frm.usrLogin.Text,
+                                    frm.usrFullName.Text,
+                                    frm.usrPassword.Text,
+                                    frm.secureUserLevel.Value,
+                                    frm.UserBlocked.Checked,
+                                    aUID,
+                                    aLvlObj) then begin
 
+
+          usr:=TUserWithLevelAccess.Create(aUID,
+                                           frm.usrLogin.Text,
+                                           frm.usrPassword.Text,
+                                           frm.usrFullName.Text,
+                                           frm.UserBlocked.Checked,
+                                           frm.secureUserLevel.Value);
+          TUsrLevelMgntSchema(FCurrentUserSchema).UserList.Add(aUID, usr);
+          LevelCreateUserEntry(lvlfrm.ListView1, usr, lvlfrm.LevelLength);
+        end;
+      end;
     end;
   finally
     FreeAndNil(frm);
@@ -333,6 +362,22 @@ begin
       if SameText(Trim(usrLogin.Text), '') or SameText(usrPassword.Text, '') or SameText(usrConfirmPassword.Text, '') or (not SameText(usrPassword.Text, usrConfirmPassword.Text)) then
         raise EInvalidUserDataException.Create;
     end;
+end;
+
+procedure TGraphicalUsrMgntInterface.LevelCreateUserEntry(
+  const aListView: TListView; const usr: TUserWithLevelAccess;
+  const lvlLength:Integer);
+var
+  item: TListItem;
+begin
+  if Assigned(aListView) and Assigned(usr) then begin
+    item:=aListView.Items.add;
+    item.Caption:=usr.Login;
+    item.SubItems.Add(usr.UserDescription);
+    item.SubItems.Add(RightStr(StringOfChar('0',lvlLength)+inttostr(usr.UserLevel),lvlLength));
+    item.SubItems.Add(ifthen(usr.UserBlocked, strYes, strNo));
+    item.Data:=usr;
+  end;
 end;
 
 procedure TGraphicalUsrMgntInterface.CanCloseLogin(Sender: TObject;
@@ -399,22 +444,10 @@ end;
 
 procedure TGraphicalUsrMgntInterface.UserManagement(aSchema: TUsrMgntSchema);
 var
-  lvlfrm:TsecureUsrLvlMgnt;
   lvlSchema: TUsrLevelMgntSchema;
   i: Integer;
   usr: TUserWithLevelAccess;
   item: TListItem;
-  lvlLength: Integer;
-
-  function RepeatString(aStr:String; count:Integer):String;
-  var
-    c: Integer;
-  begin
-    Result:='';
-    for c:=1 to count do
-      Result:=Result+aStr;
-  end;
-
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   //allows one user management...
@@ -424,22 +457,16 @@ begin
       if aSchema is TUsrLevelMgntSchema then begin
         lvlSchema:=TUsrLevelMgntSchema(aSchema);
         lvlfrm:=TsecureUsrLvlMgnt.Create(Self);
-        lvlfrm.OnAddUserClick:=@LevelAddUserClick;
-        lvlfrm.OnBlockUserClick:=@LevelBlockUserClick;
-        lvlfrm.OnChangeUserClick:=@LevelChangeUserClick;
-        lvlfrm.OnChangeUsrPassClick:=@LevelChangeUserPassClick;
         try
-
-          lvlLength := Max(Length(IntToStr(lvlSchema.MinLevel)), Length(IntToStr(lvlSchema.MaxLevel)));
+          lvlfrm.OnAddUserClick:=@LevelAddUserClick;
+          lvlfrm.OnBlockUserClick:=@LevelBlockUserClick;
+          lvlfrm.OnChangeUserClick:=@LevelChangeUserClick;
+          lvlfrm.OnChangeUsrPassClick:=@LevelChangeUserPassClick;
+          lvlfrm.LevelLength := Max(Length(IntToStr(lvlSchema.MinLevel)), Length(IntToStr(lvlSchema.MaxLevel)));
 
           for i:=0 to lvlSchema.UserList.Count-1 do begin
             usr:=lvlSchema.UserList.KeyData[lvlSchema.UserList.Keys[i]];
-            item:=lvlfrm.ListView1.Items.add;
-            item.Caption:=usr.Login;
-            item.SubItems.Add(usr.UserDescription);
-            item.SubItems.Add(RightStr(RepeatString('0',lvlLength)+inttostr(usr.UserLevel),lvlLength));
-            item.SubItems.Add(ifthen(usr.UserBlocked, strYes, strNo));
-            item.Data:=usr;
+            LevelCreateUserEntry(lvlfrm.ListView1, usr, lvlfrm.LevelLength);
           end;
           lvlfrm.ShowModal;
         finally
