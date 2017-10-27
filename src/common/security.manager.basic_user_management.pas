@@ -189,10 +189,11 @@ begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create(AOwner);
 
-  if GetControlSecurityManager.UserManagement=nil then
-    GetControlSecurityManager.UserManagement:=Self
-  else
-    raise EUserManagementIsSet.Create;
+  { TODO -oAndi : Why create we a link in the Securitymanager -> thsis should be handled by the SM }
+  //if GetControlSecurityManager.UserManagement=nil then
+  //  GetControlSecurityManager.UserManagement:=Self
+  //else
+  //  raise EUserManagementIsSet.Create;
 
   FLoggedUser:=false;
   FCurrentUserName:='';

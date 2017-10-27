@@ -138,17 +138,17 @@ end;
 
 procedure TFormAuthBased.CustomizedUserManagement1CanAccess(securityCode: String;
   var CanAccess: Boolean);
-var
-  aUser: TAuthorizedUser;
+//var
+//  aUser: TAuthorizedUser;
 begin
   CanAccess:= False;
   { TODO -oAndi : This should be easier to handle}
   //check if the current user can access the securityCode
-  if TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrLevelMgntSchema then begin
-     aUser := TAuthorizedUser(TUsrLevelMgntSchema(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[LastValidUser]);
-     if aUser <> nil then
-       CanAccess:= (aUser.AuthorizationByName[securityCode] <> nil);
-  end;
+  //if TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrLevelMgntSchema then begin
+  //   aUser := TAuthorizedUser(TUsrLevelMgntSchema(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[LastValidUser]);
+  //   if aUser <> nil then
+  //     CanAccess:= (aUser.AuthorizationByName[securityCode] <> nil);
+  //end;
   Memo1.Append('CustomizedUserManagement1CanAccess'+' '+securityCode+' = '+ifthen(CanAccess,'TRUE', 'FALSE'));
 end;
 

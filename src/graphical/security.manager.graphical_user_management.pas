@@ -1,6 +1,6 @@
 unit security.manager.graphical_user_management;
 
-{$mode objfpc}{$H+}
+{$I security.include.inc}
 
 interface
 
@@ -505,6 +505,7 @@ begin
   if (not Assigned(FCurrentUserSchema)) and Assigned(aSchema) then begin
     FCurrentUserSchema:=aSchema;
     try
+      {$ifdef UseLevelSchema}
       if aSchema is TUsrLevelMgntSchema then begin
         lvlSchema:=TUsrLevelMgntSchema(aSchema);
         lvlfrm:=TsecureUsrLvlMgnt.Create(Self);
@@ -523,7 +524,8 @@ begin
         end;
         exit;
       end;
-
+      {$endif UseLevelSchema}
+      {$IfDef UseAuthSchema}
       if aSchema is TUsrAuthSchema then begin
 
         exit;
@@ -538,6 +540,7 @@ begin
 
         exit;
       end;
+      {$endif UseAuthSchema}
 
       //unknown schema class...
       raise EUnknownUserMgntSchema.Create;

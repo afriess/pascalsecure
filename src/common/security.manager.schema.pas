@@ -1,6 +1,6 @@
 unit security.manager.schema;
 
-{$mode objfpc}{$H+}{$M+}
+{$I security.include.inc}
 
 interface
 
@@ -9,6 +9,71 @@ uses
 
 type
 
+{*****************************************************************************}
+{******              common for levelbased and authbased                 *****}
+{*****************************************************************************}
+
+  // The typ of the UserMamagment
+  TUsrMgntType = (umtUnknown,
+                  umtLevel,
+                  umtAuthorizationByUser,
+                  umtAuthorizationByGroup,
+                  umtAuthorizationByUserAndGroup);
+
+  { TCustomUser }
+  //: Implements a simple user, with UID, Login, Description and enable/disable option.
+  TCustomUser = class(TObject)
+  private
+    procedure SetUserPassword(AValue: UTF8String);
+  protected
+    //immutable fields.
+    // Unique user ID
+    FUID:Integer;
+    // Login(name) of the user maybe also a number (as string)
+    FUserLogin:UTF8String;
+    // Password of the user (NOT CRYPTED ACTUAL!)
+    FUserPassword,
+    FOldUserPassword: UTF8String;
+    // Ashort description or longname of the user
+    FUserDescription,
+    FOldUserDescription:UTF8String;
+    // Is the user blocked/deaktevated
+    FBlockedUser,
+    FOldUserState:Boolean;
+    procedure SetUserDescription(AValue: UTF8String); virtual;
+    procedure SetBlockedUser(AValue: Boolean); virtual;
+  public
+    constructor Create(aUID:Integer; aUserLogin, aUserPassword, aUserDescription:UTF8String;
+      aBlockedUser:Boolean);
+    constructor Create(aUID:Integer; aUserLogin, aUserDescription:UTF8String;
+      aBlockedUser:Boolean);
+    function Modified:Boolean; virtual;
+    procedure ResetModified; virtual;
+  published
+    property UID:integer read FUID;
+    property Login:UTF8String read FUserLogin;
+    property Password:UTF8String read FUserPassword write SetUserPassword;
+    property UserDescription:UTF8String read FUserDescription write SetUserDescription;
+    property UserBlocked:Boolean read FBlockedUser write SetBlockedUser;
+  end;
+
+  //: Implements a list of simple users
+  TUserList = specialize TFPGMap<Integer, TCustomUser>;
+
+  TSimpleUser = class(TCustomUser);
+
+  //: Implements the entire user management schema.
+  TUsrMgntSchema = class(TObject)
+  public
+    class function UsrMgntType:TUsrMgntType; virtual;
+  end;
+
+
+
+{*****************************************************************************}
+{******                         levelbased                               *****}
+{*****************************************************************************}
+{$ifdef UseLevelSchema}
   //forward.
   TUserWithLevelAccess = class;
 
@@ -35,11 +100,67 @@ type
 
   end;
 
-  TUsrMgntType = (umtUnknown,
-                  umtLevel,
-                  umtAuthorizationByUser,
-                  umtAuthorizationByGroup,
-                  umtAuthorizationByUserAndGroup);
+  { TUserWithLevelAccess }
+  //: Implements a user with access level.
+  TUserWithLevelAccess = class(TCustomUser)
+  private
+  protected
+    FUserLevel,
+    FOldUserLevel: Integer;
+    procedure SetUserLevel(AValue: Integer);
+  public
+    constructor Create(aUID: Integer; aUserLogin, aUserDescription: UTF8String;
+      aBlockedUser: Boolean; aUserLevel: Integer);
+    constructor Create(aUID: Integer; aUserLogin, aUserPassword,
+      aUserDescription: UTF8String; aBlockedUser: Boolean; aUserLevel: Integer);
+    function Modified:Boolean; override;
+    procedure ResetModified; override;
+  published
+    property UserLevel:Integer read FUserLevel write SetUserLevel;
+  end;
+
+  //: Implements a list of users with level access.
+  TUserLevelList = specialize TFPGMap<Integer, TUserWithLevelAccess>;
+
+  {:
+  Implements a user level based schema.
+
+  This schema consists in:
+  ** A user list where each user has a access leve.
+  ** Level limits (Min and Max).
+  ** The level that makes a user admin.
+
+  This schema is similar to the security system used in Elipse SCADA
+  and in Wonderware Intouch.
+  }
+  TUsrLevelMgntSchema = class(TUsrMgntSchema)
+  protected
+    FMaxLevel: Integer;
+    FMinLevel: Integer;
+    FAdminLevel: Integer;
+    FUserLevelList:TUserLevelList;
+    FLevelInterface:IUsrLevelMgntInterface;
+    function GetUserByName(aLogin: UTF8String): TCustomUser;
+  public
+    constructor Create(aMinLevel, aMaxLevel, aAdminLevel:Integer; LvlMgntIntf:IUsrLevelMgntInterface);
+    destructor Destroy; override;
+    class function UsrMgntType:TUsrMgntType; override;
+    property UserByName[UserName:UTF8String]:TCustomUser read GetUserByName;
+  published
+    function UserList:TUserLevelList;
+    function LevelInterface:IUsrLevelMgntInterface;
+    property AdminLevel:Integer read FAdminLevel;
+    property MinLevel:Integer read FMinLevel;
+    property MaxLevel:Integer read FMaxLevel;
+  end;
+
+{$endif UseLevelSchema}
+
+{*****************************************************************************}
+{******                           authbased                              *****}
+{*****************************************************************************}
+
+{$ifdef UseAuthSchema}
 
   //: Implements a simple authorization code
   TAuthorization = class(TObject)
@@ -62,72 +183,6 @@ type
     function AddAuthorization(aAuthID:Integer; aDescription:UTF8String):TAuthorization;
   end;
 
-  //: Implements a simple user, with UID, Login, Description and enable/disable option.
-
-  { TCustomUser }
-
-  TCustomUser = class(TObject)
-  private
-    procedure SetUserPassword(AValue: UTF8String);
-  protected
-    //immutable fields.
-    FUID:Integer;
-    FUserLogin:UTF8String;
-
-    FUserPassword,
-    FOldUserPassword: UTF8String;
-
-    FUserDescription,
-    FOldUserDescription:UTF8String;
-
-    FBlockedUser,
-    FOldUserState:Boolean;
-
-    procedure SetUserDescription(AValue: UTF8String); virtual;
-    procedure SetBlockedUser(AValue: Boolean); virtual;
-  public
-    constructor Create(aUID:Integer; aUserLogin, aUserPassword, aUserDescription:UTF8String;
-      aBlockedUser:Boolean);
-    constructor Create(aUID:Integer; aUserLogin, aUserDescription:UTF8String;
-      aBlockedUser:Boolean);
-    function Modified:Boolean; virtual;
-    procedure ResetModified; virtual;
-  published
-    property UID:integer read FUID;
-    property Login:UTF8String read FUserLogin;
-    property Password:UTF8String read FUserPassword write SetUserPassword;
-    property UserDescription:UTF8String read FUserDescription write SetUserDescription;
-    property UserBlocked:Boolean read FBlockedUser write SetBlockedUser;
-  end;
-
-  //: Implements a list of simple users
-  TUserList = specialize TFPGMap<Integer, TCustomUser>;
-
-  TSimpleUser = class(TCustomUser);
-
-  //: Implements a user with access level.
-
-  { TUserWithLevelAccess }
-
-  TUserWithLevelAccess = class(TCustomUser)
-  private
-  protected
-    FUserLevel,
-    FOldUserLevel: Integer;
-    procedure SetUserLevel(AValue: Integer);
-  public
-    constructor Create(aUID: Integer; aUserLogin, aUserDescription: UTF8String;
-      aBlockedUser: Boolean; aUserLevel: Integer);
-    constructor Create(aUID: Integer; aUserLogin, aUserPassword,
-      aUserDescription: UTF8String; aBlockedUser: Boolean; aUserLevel: Integer);
-    function Modified:Boolean; override;
-    procedure ResetModified; override;
-  published
-    property UserLevel:Integer read FUserLevel write SetUserLevel;
-  end;
-
-  //: Implements a list of users with level access.
-  TUserLevelList = specialize TFPGMap<Integer, TUserWithLevelAccess>;
 
   //: Implements a user with user allowed authorizations
 
@@ -205,43 +260,6 @@ type
 
   TUsrGroupList = specialize TFPGMap<Integer, TUsersGroup>;
 
-  //: Implements the entire user management schema.
-  TUsrMgntSchema = class(TObject)
-  public
-    class function UsrMgntType:TUsrMgntType; virtual;
-  end;
-
-  {:
-  Implements a user level based schema.
-
-  This schema consists in:
-  ** A user list where each user has a access leve.
-  ** Level limits (Min and Max).
-  ** The level that makes a user admin.
-
-  This schema is similar to the security system used in Elipse SCADA
-  and in Wonderware Intouch.
-  }
-  TUsrLevelMgntSchema = class(TUsrMgntSchema)
-  protected
-    FMaxLevel: Integer;
-    FMinLevel: Integer;
-    FAdminLevel: Integer;
-    FUserLevelList:TUserLevelList;
-    FLevelInterface:IUsrLevelMgntInterface;
-    function GetUserByName(aLogin: UTF8String): TCustomUser;
-  public
-    constructor Create(aMinLevel, aMaxLevel, aAdminLevel:Integer; LvlMgntIntf:IUsrLevelMgntInterface);
-    destructor Destroy; override;
-    class function UsrMgntType:TUsrMgntType; override;
-    property UserByName[UserName:UTF8String]:TCustomUser read GetUserByName;
-  published
-    function UserList:TUserLevelList;
-    function LevelInterface:IUsrLevelMgntInterface;
-    property AdminLevel:Integer read FAdminLevel;
-    property MinLevel:Integer read FMinLevel;
-    property MaxLevel:Integer read FMaxLevel;
-  end;
 
   {:
   Implements a user management that uses authorizations to allow/deny access.
@@ -341,6 +359,7 @@ type
     function UserList:TUserList;
     function GroupList:TSimpleUserGroupList;
   end;
+{$endif UseAuthSchema}
 
 implementation
 
@@ -350,6 +369,76 @@ uses
   {$endif}
   security.exceptions;
 
+{*****************************************************************************}
+{******              common for levelbased and authbased                 *****}
+{*****************************************************************************}
+
+{ TCustomUser }
+
+procedure TCustomUser.SetBlockedUser(AValue: Boolean);
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  if FBlockedUser=AValue then Exit;
+  FOldUserState:=FBlockedUser;
+  FBlockedUser:=AValue;
+end;
+
+procedure TCustomUser.SetUserPassword(AValue: UTF8String);
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  if FUserPassword=AValue then Exit;
+  FOldUserPassword:= FUserPassword;
+  FUserPassword:=AValue;
+end;
+
+procedure TCustomUser.SetUserDescription(AValue: UTF8String);
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  if FUserDescription=AValue then Exit;
+  FOldUserDescription:=FUserDescription;
+  FUserDescription:=AValue;
+end;
+
+constructor TCustomUser.Create(aUID: Integer; aUserLogin, aUserPassword,
+  aUserDescription: UTF8String; aBlockedUser: Boolean);
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  inherited Create;
+  FUID:=aUID;
+  FUserLogin:=aUserLogin;
+
+  FUserDescription    := aUserDescription;
+  FOldUserDescription := aUserDescription;
+
+  FUserPassword   := aUserPassword;
+  FOldUserPassword:= aUserPassword;
+
+  FBlockedUser  := aBlockedUser;
+  FOldUserState := aBlockedUser;
+end;
+
+constructor TCustomUser.Create(aUID: Integer; aUserLogin,
+  aUserDescription: UTF8String; aBlockedUser: Boolean);
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  Create(aUID, aUserLogin, '', aUserDescription, aBlockedUser);
+end;
+
+function TCustomUser.Modified: Boolean;
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  Result := (FUserDescription<>FOldUserDescription) or (FBlockedUser<>FOldUserState)
+            or (FUserPassword <> FOldUserPassword);
+end;
+
+procedure TCustomUser.ResetModified;
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  FOldUserDescription:=FUserDescription;
+  FOldUserPassword:= FUserPassword;
+  FOldUserState:=FBlockedUser;
+end;
+
 { TUsrMgntSchema }
 
 class function TUsrMgntSchema.UsrMgntType: TUsrMgntType;
@@ -357,6 +446,121 @@ begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:= umtUnknown;
 end;
+
+{*****************************************************************************}
+{******                         levelbased                               *****}
+{*****************************************************************************}
+{$ifdef UseLevelSchema}
+
+{ TUserWithLevelAccess }
+procedure TUserWithLevelAccess.SetUserLevel(AValue: Integer);
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  if FUserLevel=AValue then Exit;
+  FUserLevel:=AValue;
+end;
+
+constructor TUserWithLevelAccess.Create(aUID: Integer; aUserLogin,
+  aUserDescription: UTF8String; aBlockedUser: Boolean; aUserLevel: Integer);
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  Create(aUID, aUserLogin, '', aUserDescription, aBlockedUser, aUserLevel);
+end;
+
+constructor TUserWithLevelAccess.Create(aUID: Integer; aUserLogin, aUserPassword,
+  aUserDescription: UTF8String; aBlockedUser: Boolean; aUserLevel: Integer);
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  inherited Create(aUID, aUserLogin, aUserPassword, aUserDescription, aBlockedUser);
+  FUserLevel:=aUserLevel;
+  FOldUserLevel:=aUserLevel;
+end;
+
+function TUserWithLevelAccess.Modified: Boolean;
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  result := inherited Modified or (FUserLevel<>FOldUserLevel)
+end;
+
+procedure TUserWithLevelAccess.ResetModified;
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  inherited;
+  FOldUserLevel := FUserLevel;
+end;
+
+{TUsrLevelMgntSchema}
+
+function TUsrLevelMgntSchema.GetUserByName(aLogin: UTF8String): TCustomUser;
+var
+  i: Integer;
+  AuxResult: TUserWithLevelAccess;
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  Result:=nil;
+  if assigned(FUserLevelList) then
+    for i:= 0 to FUserLevelList.Count-1 do begin
+       AuxResult:= FUserLevelList.Data[i];
+       if SameStr(aLogin,AuxResult.Login) then begin
+         Result:=AuxResult;
+         break;
+       end;
+    end; // for
+end;
+
+constructor TUsrLevelMgntSchema.Create(aMinLevel, aMaxLevel,
+  aAdminLevel: Integer; LvlMgntIntf: IUsrLevelMgntInterface);
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  inherited Create;
+  FAdminLevel:=aAdminLevel;
+  FUserLevelList:=TUserLevelList.Create;
+  if aMinLevel>=aMaxLevel then
+    raise EInvalidLevelRanges.Create(aMinLevel,aMaxLevel);
+  FMinLevel:=aMinLevel;
+  FMaxLevel:=aMaxLevel;
+  FLevelInterface:=LvlMgntIntf;
+end;
+
+destructor TUsrLevelMgntSchema.Destroy;
+var
+  i: LongInt;
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  for i:=FUserLevelList.Count-1 downto 0 do begin
+    FUserLevelList.KeyData[FUserLevelList.Keys[i]].Destroy;
+    FUserLevelList.Delete(i);
+  end;
+
+  inherited Destroy;
+end;
+
+class function TUsrLevelMgntSchema.UsrMgntType: TUsrMgntType;
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  Result:= TUsrMgntType.umtLevel;
+end;
+
+function TUsrLevelMgntSchema.UserList: TUserLevelList;
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  Result:=FUserLevelList;
+end;
+
+function TUsrLevelMgntSchema.LevelInterface: IUsrLevelMgntInterface;
+begin
+  Result:=FLevelInterface;
+end;
+
+{$endif UseLevelSchema}
+
+{*****************************************************************************}
+{******                           authbased                              *****}
+{*****************************************************************************}
+
+{$ifdef UseAuthSchema}
+
+{TUsersGroup}
 
 function TUsersGroup.AddUser(const aUser: TAuthorizedUser): Boolean;
 begin
@@ -369,6 +573,8 @@ begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=AddCustomUser(aUser);
 end;
+
+{TGroupAuthSchema}
 
 constructor TGroupAuthSchema.Create;
 begin
@@ -404,6 +610,9 @@ begin
   Result:=FGroupList;
 end;
 
+
+{TUsrGroupAuthSchema}
+
 constructor TUsrGroupAuthSchema.Create;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
@@ -429,6 +638,8 @@ begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=FGroupList;
 end;
+
+{TUsrAuthSchema}
 
 function TUsrAuthSchema.GetUser(aIndex: Integer): TCustomUser;
 begin
@@ -498,6 +709,8 @@ begin
   Result:=FUserList;
 end;
 
+{TAuthBasedUsrMgntSchema}
+
 constructor TAuthBasedUsrMgntSchema.Create;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
@@ -518,67 +731,7 @@ begin
   Result:=FAuthorizations;
 end;
 
-function TUsrLevelMgntSchema.GetUserByName(aLogin: UTF8String): TCustomUser;
-var
-  i: Integer;
-  AuxResult: TUserWithLevelAccess;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Result:=nil;
-  if assigned(FUserLevelList) then
-    for i:= 0 to FUserLevelList.Count-1 do begin
-       AuxResult:= FUserLevelList.Data[i];
-       if SameStr(aLogin,AuxResult.Login) then begin
-         Result:=AuxResult;
-         break;
-       end;
-    end; // for
-end;
-
-constructor TUsrLevelMgntSchema.Create(aMinLevel, aMaxLevel,
-  aAdminLevel: Integer; LvlMgntIntf: IUsrLevelMgntInterface);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  inherited Create;
-  FAdminLevel:=aAdminLevel;
-  FUserLevelList:=TUserLevelList.Create;
-  if aMinLevel>=aMaxLevel then
-    raise EInvalidLevelRanges.Create(aMinLevel,aMaxLevel);
-  FMinLevel:=aMinLevel;
-  FMaxLevel:=aMaxLevel;
-  FLevelInterface:=LvlMgntIntf;
-end;
-
-destructor TUsrLevelMgntSchema.Destroy;
-var
-  i: LongInt;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  for i:=FUserLevelList.Count-1 downto 0 do begin
-    FUserLevelList.KeyData[FUserLevelList.Keys[i]].Destroy;
-    FUserLevelList.Delete(i);
-  end;
-
-  inherited Destroy;
-end;
-
-class function TUsrLevelMgntSchema.UsrMgntType: TUsrMgntType;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Result:= TUsrMgntType.umtLevel;
-end;
-
-function TUsrLevelMgntSchema.UserList: TUserLevelList;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Result:=FUserLevelList;
-end;
-
-function TUsrLevelMgntSchema.LevelInterface: IUsrLevelMgntInterface;
-begin
-  Result:=FLevelInterface;
-end;
-
+{TCustomGroup}
 
 function TCustomGroup.GetUser(aIndex: Integer): TCustomUser;
 begin
@@ -725,7 +878,7 @@ begin
   Result:=FUserAuthorizations;
 end;
 
-{ TAuthorizationList }
+{ TAuthorization }
 
 function TAuthorizations.AddAuthorization(aAuthID: Integer;
   aDescription: UTF8String): TAuthorization;
@@ -735,8 +888,6 @@ begin
   Add(aAuthID, Result);
 end;
 
-{ TAuthorization }
-
 constructor TAuthorization.Create(aAuthID: Integer; aDescription: UTF8String);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
@@ -745,109 +896,8 @@ begin
   FDescription:=aDescription;
 end;
 
-{ TUserWithLevelAccess }
+{$endif UseAuthSchema}
 
-procedure TUserWithLevelAccess.SetUserLevel(AValue: Integer);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FUserLevel=AValue then Exit;
-  FUserLevel:=AValue;
-end;
-
-constructor TUserWithLevelAccess.Create(aUID: Integer; aUserLogin,
-  aUserDescription: UTF8String; aBlockedUser: Boolean; aUserLevel: Integer);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Create(aUID, aUserLogin, '', aUserDescription, aBlockedUser, aUserLevel);
-end;
-
-constructor TUserWithLevelAccess.Create(aUID: Integer; aUserLogin, aUserPassword,
-  aUserDescription: UTF8String; aBlockedUser: Boolean; aUserLevel: Integer);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  inherited Create(aUID, aUserLogin, aUserPassword, aUserDescription, aBlockedUser);
-  FUserLevel:=aUserLevel;
-  FOldUserLevel:=aUserLevel;
-end;
-
-function TUserWithLevelAccess.Modified: Boolean;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  result := inherited Modified or (FUserLevel<>FOldUserLevel)
-end;
-
-procedure TUserWithLevelAccess.ResetModified;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  inherited;
-  FOldUserLevel := FUserLevel;
-end;
-
-{ TCustomUser }
-
-procedure TCustomUser.SetBlockedUser(AValue: Boolean);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FBlockedUser=AValue then Exit;
-  FOldUserState:=FBlockedUser;
-  FBlockedUser:=AValue;
-end;
-
-procedure TCustomUser.SetUserPassword(AValue: UTF8String);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FUserPassword=AValue then Exit;
-  FOldUserPassword:= FUserPassword;
-  FUserPassword:=AValue;
-end;
-
-procedure TCustomUser.SetUserDescription(AValue: UTF8String);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FUserDescription=AValue then Exit;
-  FOldUserDescription:=FUserDescription;
-  FUserDescription:=AValue;
-end;
-
-constructor TCustomUser.Create(aUID: Integer; aUserLogin, aUserPassword,
-  aUserDescription: UTF8String; aBlockedUser: Boolean);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  inherited Create;
-  FUID:=aUID;
-  FUserLogin:=aUserLogin;
-
-  FUserDescription    := aUserDescription;
-  FOldUserDescription := aUserDescription;
-
-  FUserPassword   := aUserPassword;
-  FOldUserPassword:= aUserPassword;
-
-  FBlockedUser  := aBlockedUser;
-  FOldUserState := aBlockedUser;
-end;
-
-constructor TCustomUser.Create(aUID: Integer; aUserLogin,
-  aUserDescription: UTF8String; aBlockedUser: Boolean);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Create(aUID, aUserLogin, '', aUserDescription, aBlockedUser);
-end;
-
-function TCustomUser.Modified: Boolean;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Result := (FUserDescription<>FOldUserDescription) or (FBlockedUser<>FOldUserState)
-            or (FUserPassword <> FOldUserPassword);
-end;
-
-procedure TCustomUser.ResetModified;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  FOldUserDescription:=FUserDescription;
-  FOldUserPassword:= FUserPassword;
-  FOldUserState:=FBlockedUser;
-end;
 
 end.
 
