@@ -9,13 +9,14 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
+        <IncludeFiles Value="..\common"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
     <Description Value="A security system for Lazarus LCL - visual components "/>
     <License Value="LGPL v2.1 with linking exception"/>
     <Version Major="1"/>
-    <Files Count="48">
+    <Files Count="49">
       <Item1>
         <Filename Value="pascalsecure_visual_reg.pas"/>
         <HasRegisterProc Value="True"/>
@@ -209,6 +210,10 @@
         <Filename Value="security.manager.mgntdlg.pas"/>
         <UnitName Value="security.manager.mgntdlg"/>
       </Item48>
+      <Item49>
+        <Filename Value="..\common\security.include.inc"/>
+        <Type Value="Include"/>
+      </Item49>
     </Files>
     <RequiredPkgs Count="4">
       <Item1>
@@ -225,6 +230,7 @@
       </Item4>
     </RequiredPkgs>
     <UsageOptions>
+      <IncludePath Value="C:\Data\Pascal\komponenten\pascalsecure\src\common"/>
       <UnitPath Value="$(PkgOutDir)"/>
     </UsageOptions>
     <PublishOptions>

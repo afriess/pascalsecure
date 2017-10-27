@@ -68,7 +68,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="9">
+    <Units Count="10">
       <Unit0>
         <Filename Value="LoginLvlBased.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -109,6 +109,10 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="security.manager.SecureControlInterface"/>
       </Unit8>
+      <Unit9>
+        <Filename Value="..\..\src\common\security.include.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit9>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -150,7 +154,7 @@
       </Options>
     </Linking>
     <Other>
-      <CustomOptions Value="-ddebug_secure"/>
+      <CustomOptions Value="-dDebugLevelSchemaOnly"/>
     </Other>
   </CompilerOptions>
   <Debugging>

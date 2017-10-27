@@ -27,7 +27,7 @@ function BuildSchemaLVL: Boolean;
 var
   UserMgmt: TUserCustomizedUserManagement;
   ASchema: TUsrLevelMgntSchema;
-  AUser: TAuthorizedUser;
+//  AUser: TAuthorizedUser;
 begin
   result := false;
   // Clear a possible old managment
