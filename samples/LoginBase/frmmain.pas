@@ -47,9 +47,12 @@ type
     procedure UserCustomizedUserManagement1LevelAddUser(const UserLogin,
       UserDescription, PlainPassword: UTF8String; const aUsrLevel: Integer;
       const aBlocked: Boolean; out aUID: Integer; out Result: Boolean);
+    procedure UserCustomizedUserManagement1LevelDelUser(
+      const aUsrObject: TUserWithLevelAccess; out Result: Boolean);
     procedure UserCustomizedUserManagement1Logout(Sender: TObject);
   private
     LastValidUser:String;
+    NextUID:Integer;
   public
 
   end;
@@ -125,8 +128,17 @@ procedure TForm1.UserCustomizedUserManagement1LevelAddUser(const UserLogin,
   UserDescription, PlainPassword: UTF8String; const aUsrLevel: Integer;
   const aBlocked: Boolean; out aUID: Integer; out Result: Boolean);
 begin
-  ShowMessage('Add in your database, file or something else...');
+  Memo1.Append('UserCustomizedUserManagement1LevelAddUser');
+  aUID:=NextUID;
+  Inc(NextUID);
   Result:=true;
+  ShowMessage('Add the new user in your database, file or something else...');
+end;
+
+procedure TForm1.UserCustomizedUserManagement1LevelDelUser(
+  const aUsrObject: TUserWithLevelAccess; out Result: Boolean);
+begin
+  Result:=true; //confirm all delete commands...
 end;
 
 procedure TForm1.UserCustomizedUserManagement1Logout(Sender: TObject);
@@ -174,6 +186,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
   Memo1.Clear;
   Memo1.Append('Create');
+  NextUID:=1000;
 end;
 
 end.

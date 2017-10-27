@@ -54,7 +54,7 @@ end;
 
 function TsecureAddUser.CloseQuery: boolean;
 begin
-  Result:=ValidAdd and inherited CloseQuery;
+  Result:=((ModalResult=mrCancel) or ValidAdd) and inherited CloseQuery;
 end;
 
 end.

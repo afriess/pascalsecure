@@ -11,6 +11,7 @@ uses
 
 type
   TSecureLvlUsrMgntNotifyEvent = procedure(Sender:TObject; const aUser:TUserWithLevelAccess) of object;
+  TSecureLvlUsrMgntDelUsrEvent = procedure(Sender:TObject; var   aUser:TUserWithLevelAccess) of object;
 
   TSecureUsrLvlMgnt = class(TCustomUsrMgnt)
     ChangePass: TAction;
@@ -38,12 +39,12 @@ type
     FOnBlockUserClick: TSecureLvlUsrMgntNotifyEvent;
     FOnChangeUserClick: TSecureLvlUsrMgntNotifyEvent;
     FOnChangeUsrPassClick: TSecureLvlUsrMgntNotifyEvent;
-    FOnDelUserClick: TSecureLvlUsrMgntNotifyEvent;
+    FOnDelUserClick: TSecureLvlUsrMgntDelUsrEvent;
     procedure ValidateSelectedUser(const aUser: TListItem);
   published
     property LevelLength:Integer                               read FLevelLength          write FLevelLength;
     property OnAddUserClick:TNotifyEvent                       read FOnAddUserClick       write FOnAddUserClick;
-    property OnDelUserClick:TSecureLvlUsrMgntNotifyEvent       read FOnDelUserClick       write FOnDelUserClick;
+    property OnDelUserClick:TSecureLvlUsrMgntDelUsrEvent       read FOnDelUserClick       write FOnDelUserClick;
     property OnBlockUserClick:TSecureLvlUsrMgntNotifyEvent     read FOnBlockUserClick     write FOnBlockUserClick;
     property OnChangeUserClick:TSecureLvlUsrMgntNotifyEvent    read FOnChangeUserClick    write FOnChangeUserClick;
     property OnChangeUsrPassClick:TSecureLvlUsrMgntNotifyEvent read FOnChangeUsrPassClick write FOnChangeUsrPassClick;
@@ -90,11 +91,15 @@ begin
 end;
 
 procedure TSecureUsrLvlMgnt.delUserExecute(Sender: TObject);
+var
+  ausr: TUserWithLevelAccess;
 begin
   ValidateSelectedUser(ListView1.Selected);
 
+  ausr:=TUserWithLevelAccess(ListView1.Selected.Data);
+
   if Assigned(FOnDelUserClick) then
-    FOnDelUserClick(Sender, TUserWithLevelAccess(ListView1.Selected.Data));
+    FOnDelUserClick(Sender, ausr);
 end;
 
 procedure TSecureUsrLvlMgnt.DisableUserExecute(Sender: TObject);

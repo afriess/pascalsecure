@@ -20,7 +20,7 @@ type
                      out   UID:Integer;
                      out   UsrObject:TUserWithLevelAccess):Boolean;
 
-    function LevelDelUser(Const UsrObject:TUserWithLevelAccess):Boolean;
+    function LevelDelUser(var UsrObject:TUserWithLevelAccess):Boolean;
 
     function LevelUpdateUser(const UsrObject:TUserWithLevelAccess;
                         const UserDescription, PlainPassword:UTF8String;

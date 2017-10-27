@@ -83,9 +83,10 @@ type
       const aUser: TUserWithLevelAccess);
     procedure LevelChangeUserPassClick(Sender: TObject;
       const aUser: TUserWithLevelAccess);
+    procedure LevelDeleteUser(Sender: TObject; var aUser: TUserWithLevelAccess
+      );
     procedure LevelValidateAddUser(Sender: TObject);
-    procedure LevelCreateUserEntry(const aListView: TListView;
-      const usr: TUserWithLevelAccess; const lvlLength: Integer);
+    procedure LevelRefreshUserList;
   protected
     frmLogin:TSecureCustomFrmLogin;
     lvlfrm:TsecureUsrLvlMgnt;
@@ -125,6 +126,10 @@ ResourceString
   strNo                  = 'No';
   strInvalidDataSupplied = 'Invalid user data';
   strPasswordsDontMatch  = 'Supplied passwords don''t math!';
+  strDeleteUser          = 'User removal';
+  strConfirmDeleteUser   = 'Confirm the complete removal of user "%s"?';
+  strYesDeleteTheUser    = 'Yes, delete user "%s"';
+  strNoKeepIt            = 'No, keep it intact!';
 
 implementation
 
@@ -327,16 +332,7 @@ begin
                                     frm.UserBlocked.Checked,
                                     aUID,
                                     aLvlObj) then begin
-
-
-          usr:=TUserWithLevelAccess.Create(aUID,
-                                           frm.usrLogin.Text,
-                                           frm.usrPassword.Text,
-                                           frm.usrFullName.Text,
-                                           frm.UserBlocked.Checked,
-                                           frm.secureUserLevel.Value);
-          TUsrLevelMgntSchema(FCurrentUserSchema).UserList.Add(aUID, usr);
-          LevelCreateUserEntry(lvlfrm.ListView1, usr, lvlfrm.LevelLength);
+          LevelRefreshUserList;
         end;
       end;
     end;
@@ -366,6 +362,33 @@ begin
 
 end;
 
+procedure TGraphicalUsrMgntInterface.LevelDeleteUser(Sender: TObject;
+  var aUser: TUserWithLevelAccess);
+var
+  a, b, c, d, e: Boolean;
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  a:=Assigned(FCurrentUserSchema);
+  b:=(FCurrentUserSchema is TUsrLevelMgntSchema);
+  c:=Supports(TUsrLevelMgntSchema(FCurrentUserSchema).LevelInterface, IUsrLevelMgntInterface);
+  d:=Assigned(aUser);
+  e:=Assigned(lvlfrm);
+
+  if (a=false) or (b=false) or (c=false) or (d=false) or (e=false) then
+    raise EInvalidUsrMgntSchema.Create;
+
+  if QuestionDlg(strDeleteUser,
+                 Format(strConfirmDeleteUser,[aUser.Login]),
+                 mtConfirmation,
+                 [mrYes, Format(strYesDeleteTheUser,[aUser.Login]), mrNo, strNoKeepIt, 'IsDefault'],
+                 0)=mrYes
+  then begin
+    if TUsrLevelMgntSchema(FCurrentUserSchema).LevelInterface.LevelDelUser(aUser) then begin
+      LevelRefreshUserList;
+    end;
+  end;
+end;
+
 procedure TGraphicalUsrMgntInterface.LevelValidateAddUser(Sender: TObject);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
@@ -378,20 +401,33 @@ begin
     end;
 end;
 
-procedure TGraphicalUsrMgntInterface.LevelCreateUserEntry(
-  const aListView: TListView; const usr: TUserWithLevelAccess;
-  const lvlLength:Integer);
+procedure TGraphicalUsrMgntInterface.LevelRefreshUserList;
 var
   item: TListItem;
+  u, lvlLength: Integer;
+  aLvlSchema: TUsrLevelMgntSchema;
+  usr: TUserWithLevelAccess;
+  a, b, c, d: Boolean;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if Assigned(aListView) and Assigned(usr) then begin
-    item:=aListView.Items.add;
-    item.Caption:=usr.Login;
-    item.SubItems.Add(usr.UserDescription);
-    item.SubItems.Add(RightStr(StringOfChar('0',lvlLength)+inttostr(usr.UserLevel),lvlLength));
-    item.SubItems.Add(ifthen(usr.UserBlocked, strYes, strNo));
-    item.Data:=usr;
+  a:=Assigned(FCurrentUserSchema);
+  b:=(FCurrentUserSchema is TUsrLevelMgntSchema);
+  c:=Supports(TUsrLevelMgntSchema(FCurrentUserSchema).LevelInterface, IUsrLevelMgntInterface);
+  d:=Assigned(lvlfrm);
+
+  if a and b and c and d then begin
+    lvlfrm.ListView1.Clear;
+    aLvlSchema:=TUsrLevelMgntSchema(FCurrentUserSchema);
+    lvlLength:=lvlfrm.LevelLength;
+    for u:=0 to TUsrLevelMgntSchema(FCurrentUserSchema).UserList.Count-1 do begin
+      usr:=aLvlSchema.UserList.KeyData[aLvlSchema.UserList.Keys[u]];
+      item:=lvlfrm.ListView1.Items.add;
+      item.Caption:=usr.Login;
+      item.SubItems.Add(usr.UserDescription);
+      item.SubItems.Add(RightStr(StringOfChar('0',lvlLength)+inttostr(usr.UserLevel),lvlLength));
+      item.SubItems.Add(ifthen(usr.UserBlocked, strYes, strNo));
+      item.Data:=usr;
+    end;
   end;
 end;
 
@@ -477,12 +513,10 @@ begin
           lvlfrm.OnBlockUserClick:=@LevelBlockUserClick;
           lvlfrm.OnChangeUserClick:=@LevelChangeUserClick;
           lvlfrm.OnChangeUsrPassClick:=@LevelChangeUserPassClick;
+          lvlfrm.OnDelUserClick:=@LevelDeleteUser;
           lvlfrm.LevelLength := Max(Length(IntToStr(lvlSchema.MinLevel)), Length(IntToStr(lvlSchema.MaxLevel)));
 
-          for i:=0 to lvlSchema.UserList.Count-1 do begin
-            usr:=lvlSchema.UserList.KeyData[lvlSchema.UserList.Keys[i]];
-            LevelCreateUserEntry(lvlfrm.ListView1, usr, lvlfrm.LevelLength);
-          end;
+          LevelRefreshUserList;
           lvlfrm.ShowModal;
         finally
           FreeAndNil(lvlfrm);

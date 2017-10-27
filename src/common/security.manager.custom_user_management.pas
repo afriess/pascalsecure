@@ -66,6 +66,7 @@ type
     FLevelDelUser             :TLevelDelUser;
     FLevelUpdateUser          :TLevelUpdateUser;
   protected
+    FCurrentUserSchema:TUsrMgntSchema;
     function  CheckUserAndPassword(User, Pass:String; var UserID:Integer; LoginAction:Boolean):Boolean; override;
 
     function  GetCurrentUserName:String; override;
@@ -73,7 +74,7 @@ type
     function  CanAccess(sc: String; aUID: Integer): Boolean; override; overload;
 
     function UsrMgntType: TUsrMgntType; override;
-    function GetUserSchema: TUsrMgntSchema; override;
+    function GetUserMgnt: TUsrMgntSchema; override;
   protected
     //level interface.
     function LevelAddUser(const UserLogin, UserDescription, PlainPassword:UTF8String;
@@ -82,7 +83,7 @@ type
                           out   aUID:Integer;
                           out   aUsrObject:TUserWithLevelAccess):Boolean;
 
-    function LevelDelUser(Const aUsrObject:TUserWithLevelAccess):Boolean;
+    function LevelDelUser(var  aUsrObject:TUserWithLevelAccess):Boolean;
 
     function LevelUpdateUser(const aUsrObject:TUserWithLevelAccess;
                              const aUserDescription, aPlainPassword:UTF8String;
@@ -207,12 +208,14 @@ begin
     FGetUserSchemaType(Result);
 end;
 
-function TUserCustomizedUserManagement.GetUserSchema: TUsrMgntSchema;
+function TUserCustomizedUserManagement.GetUserMgnt: TUsrMgntSchema;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
   if Assigned(FGetUserSchema) then
     FGetUserSchema(Result);
+
+  FCurrentUserSchema:=Result
 end;
 
 function TUserCustomizedUserManagement.LevelAddUser(const UserLogin,
@@ -226,15 +229,35 @@ begin
     FLevelAddUser(UserLogin, UserDescription, PlainPassword, aUsrLevel, aBlocked, aUID, Result);
   end;
 
-  if Result then begin
+  if Result and Assigned(FCurrentUserSchema) and (FCurrentUserSchema is TUsrLevelMgntSchema) then begin
     aUsrObject:=TUserWithLevelAccess.Create(aUID,UserLogin,PlainPassword,UserDescription,aBlocked, aUsrLevel);
+    TUsrLevelMgntSchema(FCurrentUserSchema).UserList.Add(aUsrObject.UID, aUsrObject);
   end;
 end;
 
 function TUserCustomizedUserManagement.LevelDelUser(
-  const aUsrObject: TUserWithLevelAccess): Boolean;
+  var aUsrObject: TUserWithLevelAccess): Boolean;
+var
+  idx: LongInt;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  Result:=false;
+  if Assigned(FLevelDelUser) then begin
+    FLevelDelUser(aUsrObject, Result);
+  end;
+
+  if Result and Assigned(FCurrentUserSchema) and (FCurrentUserSchema is TUsrLevelMgntSchema) then begin
+    idx:=TUsrLevelMgntSchema(FCurrentUserSchema).UserList.IndexOf(aUsrObject.UID);
+    if idx<>-1 then begin
+      if TUsrLevelMgntSchema(FCurrentUserSchema).UserList.KeyData[aUsrObject.UID]<>aUsrObject then begin
+        TUsrLevelMgntSchema(FCurrentUserSchema).UserList.KeyData[aUsrObject.UID].Destroy;
+        FreeAndNil(aUsrObject);
+      end else
+        FreeAndNil(aUsrObject);
+
+      TUsrLevelMgntSchema(FCurrentUserSchema).UserList.Delete(idx);
+    end;
+  end;
 end;
 
 function TUserCustomizedUserManagement.LevelUpdateUser(
