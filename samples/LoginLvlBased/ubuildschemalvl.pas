@@ -25,7 +25,7 @@ uses
 
 function BuildSchemaLVL: Boolean;
 var
-  UserMgmt: TUserCustomizedUserManagement;
+  UserMgmt: TUserLevelUserManagement;
   ASchema: TUsrLevelMgntSchema;
 //  AUser: TAuthorizedUser;
 begin
@@ -34,7 +34,7 @@ begin
   //if (GetControlSecurityManager.UserManagement <> nil) then
   //  GetControlSecurityManager.UserManagement:= nil;
   // *** Usermanagment ***
-  UserMgmt:= TUserCustomizedUserManagement.Create(nil);
+  UserMgmt:= TUserLevelUserManagement.Create(nil);
   // Create a authentication based Usermanagment
   ASchema:= TUsrLevelMgntSchema.Create(1, 100, 1, UserMgmt);
   { TODO  : Simplify this to avoid potential errors }
