@@ -13,8 +13,6 @@ type
 
   TFPGSecureControlsList = specialize TFPGList<ISecureControlInterface>;
 
-  { TpSCADAControlSecurityManager }
-
   { TControlSecurityManager }
 
   TControlSecurityManager = class(TComponent)

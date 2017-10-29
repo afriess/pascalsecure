@@ -18,7 +18,7 @@ implementation
 
 procedure Register;
 begin
-  RegisterComponents(SPascalSecurePalette,[TUserCustomizedUserManagement]);
+  RegisterComponents(SPascalSecurePalette,[TUserLevelUserManagement]);
 end;
 
 end.

@@ -23,10 +23,9 @@ type
     LoginAction1: TLoginAction;
     ManageUsersAndGroupsAction1: TManageUsersAndGroupsAction;
     Memo1: TMemo;
-    CustomizedUserManagement1: TUserCustomizedUserManagement;
     SecureButton1: TSecureButton;
     SecureButton2: TSecureButton;
-    UserCustomizedUserManagement1: TUserCustomizedUserManagement;
+    UserLevelUserManagement1: TUserLevelUserManagement;
     procedure BuLogoutClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure CustomizedUserManagement1CanAccess(securityCode: String;
@@ -37,12 +36,12 @@ type
     procedure CustomizedUserManagement1GetUserLogin(var UserInfo: String);
     procedure FormDestroy(Sender: TObject);
     procedure SecureButton1Click(Sender: TObject);
-    procedure UserCustomizedUserManagement1GetSchemaType(
+    procedure UserLevelUserManagement1GetSchemaType(
       var SchemaType: TUsrMgntType);
-    procedure UserCustomizedUserManagement1GetUserName(var UserInfo: String);
-    procedure UserCustomizedUserManagement1GetUserSchema(
+    procedure UserLevelUserManagement1GetUserName(var UserInfo: String);
+    procedure UserLevelUserManagement1GetUserSchema(
       var Schema: TUsrMgntSchema);
-    procedure UserCustomizedUserManagement1Logout(Sender: TObject);
+    procedure UserLevelUserManagement1Logout(Sender: TObject);
     procedure UserCustomizedUserManagement1ManageUsersAndGroups(Sender: TObject
       );
   private
@@ -75,8 +74,8 @@ begin
   ValidUser:= False;
   LastValidUser:= '';
   { TODO -oAndi : This should be easier to handle}
-  if TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrLevelMgntSchema then begin
-     aUser := TUsrLevelMgntSchema(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[user];
+  if TUserLevelUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrLevelMgntSchema then begin
+     aUser := TUsrLevelMgntSchema(TUserLevelUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[user];
      if aUser <> nil then
         ValidUser:= SameStr(aUser.Password,pass);
   end;
@@ -103,19 +102,19 @@ begin
   Memo1.Append('SecureButton Clicked');
 end;
 
-procedure TFormAuthBased.UserCustomizedUserManagement1GetSchemaType(
+procedure TFormAuthBased.UserLevelUserManagement1GetSchemaType(
   var SchemaType: TUsrMgntType);
 begin
   Memo1.Append('UserCustomizedUserManagement1GetSchemaType');
 end;
 
-procedure TFormAuthBased.UserCustomizedUserManagement1GetUserName(
+procedure TFormAuthBased.UserLevelUserManagement1GetUserName(
   var UserInfo: String);
 begin
   Memo1.Append('UserCustomizedUserManagement1GetUserName');
 end;
 
-procedure TFormAuthBased.UserCustomizedUserManagement1GetUserSchema(
+procedure TFormAuthBased.UserLevelUserManagement1GetUserSchema(
   var Schema: TUsrMgntSchema);
 begin
   // Only used if OnManageUsersANdGroups not set !!
@@ -123,7 +122,7 @@ begin
   //Schema:= MySchema;
 end;
 
-procedure TFormAuthBased.UserCustomizedUserManagement1Logout(Sender: TObject);
+procedure TFormAuthBased.UserLevelUserManagement1Logout(Sender: TObject);
 begin
   Memo1.Append('CustomizedUserManagement1Logout');
   LastValidUser:='';
@@ -133,7 +132,7 @@ procedure TFormAuthBased.UserCustomizedUserManagement1ManageUsersAndGroups(
   Sender: TObject);
 begin
   Memo1.Append('UserCustomizedUserManagement1ManageUsersAndGroups');
-  GraphicalUsrMgntInterface1.UserManagement(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt);
+  GraphicalUsrMgntInterface1.UserManagement(TUserLevelUserManagement(GetControlSecurityManager.UserManagement).UserMgnt);
 end;
 
 procedure TFormAuthBased.CustomizedUserManagement1CanAccess(securityCode: String;
@@ -144,8 +143,8 @@ begin
   CanAccess:= False;
   { TODO -oAndi : This should be easier to handle}
   //check if the current user can access the securityCode
-  //if TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrLevelMgntSchema then begin
-  //   aUser := TAuthorizedUser(TUsrLevelMgntSchema(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[LastValidUser]);
+  //if TUserLevelUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrLevelMgntSchema then begin
+  //   aUser := TAuthorizedUser(TUsrLevelMgntSchema(TUserLevelUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[LastValidUser]);
   //   if aUser <> nil then
   //     CanAccess:= (aUser.AuthorizationByName[securityCode] <> nil);
   //end;

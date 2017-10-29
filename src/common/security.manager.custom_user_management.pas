@@ -29,24 +29,23 @@ type
                                          const aBlocked:Boolean;
                                          out   aUID:Integer;
                                          out   Result:Boolean) of object;
-  TLevelDelUser              = procedure(var   aUsrObject:TUserWithLevelAccess;
+  TLevelDelUser              = procedure(Const aUsrObject:TUserWithLevelAccess;
                                          out   Result:Boolean) of object;
-  TLevelUpdateUser           = procedure(var   aUsrObject:TUserWithLevelAccess;
+  TLevelUpdateUser           = procedure(const aUsrObject:TUserWithLevelAccess;
                                          const aUserDescription, aPlainPassword:UTF8String;
                                          const aUsrLevel:Integer;
                                          const aBlocked:Boolean;
                                          out   Result:Boolean) of object;
-  TLevelBlockUser            = procedure(var   aUsrObject:TUserWithLevelAccess;
+  TLevelBlockUser            = procedure(const aUsrObject:TUserWithLevelAccess;
                                          const aBlocked:Boolean;
                                          out   Result:Boolean) of object;
-  TLevelChangeUserPass       = procedure(var   aUsrObject:TUserWithLevelAccess;
+  TLevelChangeUserPass       = procedure(const aUsrObject:TUserWithLevelAccess;
                                          const aPlainPassword:UTF8String;
                                          out   Result:Boolean) of object;
 
-  { TUserCustomizedUserManagement }
+  { TUserLevelUserManagement }
 
-  { TODO -oAndi : The naming is not coccect, because it is Levelbased  see interface }
-  TUserCustomizedUserManagement = class(TBasicUserManagement, IUsrLevelMgntInterface)
+  TUserLevelUserManagement = class(TBasicUserManagement, IUsrLevelMgntInterface)
   private
     FCheckUserAndPasswordEvent:TCheckUserAndPasswordEvent;
     FGetUserName              :TGetUserNameAndLogin;
@@ -86,15 +85,15 @@ type
 
     function LevelDelUser(var  aUsrObject:TUserWithLevelAccess):Boolean;
 
-    function LevelUpdateUser(var   aUsrObject:TUserWithLevelAccess;
+    function LevelUpdateUser(const aUsrObject:TUserWithLevelAccess;
                              const aUserDescription, aPlainPassword:UTF8String;
                              const aUsrLevel:Integer;
                              const aBlocked:Boolean):Boolean;
 
-    function LevelBlockUser(var   aUsrObject:TUserWithLevelAccess;
+    function LevelBlockUser(const aUsrObject:TUserWithLevelAccess;
                             const aBlocked:Boolean):Boolean;
 
-    function LevelChangeUserPass(var   aUsrObject:TUserWithLevelAccess;
+    function LevelChangeUserPass(const aUsrObject:TUserWithLevelAccess;
                                  const aPlainPassword:UTF8String):Boolean;
   public
     procedure Logout; override;
@@ -146,9 +145,9 @@ uses
   {$endif}
 
 
-{ TUserCustomizedUserManagement }
+{ TUserLevelUserManagement }
 
-function TUserCustomizedUserManagement.CheckUserAndPassword(User,
+function TUserLevelUserManagement.CheckUserAndPassword(User,
   Pass: String; var UserID: Integer; LoginAction: Boolean): Boolean;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
@@ -161,7 +160,7 @@ begin
   end;
 end;
 
-function TUserCustomizedUserManagement.GetCurrentUserName: String;
+function TUserLevelUserManagement.GetCurrentUserName: String;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:='';
@@ -174,7 +173,7 @@ begin
     end;
 end;
 
-function TUserCustomizedUserManagement.GetCurrentUserLogin: String;
+function TUserLevelUserManagement.GetCurrentUserLogin: String;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:='';
@@ -187,7 +186,7 @@ begin
     end;
 end;
 
-function TUserCustomizedUserManagement.CanAccess(sc: String; aUID: Integer
+function TUserLevelUserManagement.CanAccess(sc: String; aUID: Integer
   ): Boolean;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
@@ -201,7 +200,7 @@ begin
     end;
 end;
 
-function TUserCustomizedUserManagement.UsrMgntType: TUsrMgntType;
+function TUserLevelUserManagement.UsrMgntType: TUsrMgntType;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=umtUnknown;
@@ -209,7 +208,7 @@ begin
     FGetUserSchemaType(Result);
 end;
 
-function TUserCustomizedUserManagement.GetUserMgnt: TUsrMgntSchema;
+function TUserLevelUserManagement.GetUserMgnt: TUsrMgntSchema;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=nil;
@@ -219,7 +218,7 @@ begin
   FCurrentUserSchema:=Result
 end;
 
-function TUserCustomizedUserManagement.LevelAddUser(const UserLogin,
+function TUserLevelUserManagement.LevelAddUser(const UserLogin,
   UserDescription, PlainPassword: UTF8String; const aUsrLevel: Integer;
   const aBlocked: Boolean; out aUID: Integer; out
   aUsrObject: TUserWithLevelAccess): Boolean;
@@ -236,7 +235,7 @@ begin
   end;
 end;
 
-function TUserCustomizedUserManagement.LevelDelUser(
+function TUserLevelUserManagement.LevelDelUser(
   var aUsrObject: TUserWithLevelAccess): Boolean;
 var
   idx: LongInt;
@@ -261,30 +260,30 @@ begin
   end;
 end;
 
-function TUserCustomizedUserManagement.LevelUpdateUser(
-  var aUsrObject: TUserWithLevelAccess; const aUserDescription,
+function TUserLevelUserManagement.LevelUpdateUser(
+  const aUsrObject: TUserWithLevelAccess; const aUserDescription,
   aPlainPassword: UTF8String; const aUsrLevel: Integer; const aBlocked: Boolean
   ): Boolean;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
 end;
 
-function TUserCustomizedUserManagement.LevelBlockUser(
-  var aUsrObject: TUserWithLevelAccess; const aBlocked: Boolean): Boolean;
+function TUserLevelUserManagement.LevelBlockUser(
+  const aUsrObject: TUserWithLevelAccess; const aBlocked: Boolean): Boolean;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FLevelBlockUser) then
     FLevelBlockUser(aUsrObject, aBlocked, Result);
 end;
 
-function TUserCustomizedUserManagement.LevelChangeUserPass(
-  var aUsrObject: TUserWithLevelAccess; const aPlainPassword: UTF8String
+function TUserLevelUserManagement.LevelChangeUserPass(
+  const aUsrObject: TUserWithLevelAccess; const aPlainPassword: UTF8String
   ): Boolean;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
 end;
 
-procedure TUserCustomizedUserManagement.Logout;
+procedure TUserLevelUserManagement.Logout;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Logout;
@@ -295,7 +294,7 @@ begin
     end;
 end;
 
-procedure TUserCustomizedUserManagement.Manage;
+procedure TUserLevelUserManagement.Manage;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FManageUsersAndGroupsEvent) then
@@ -304,21 +303,21 @@ begin
     inherited Manage;
 end;
 
-procedure TUserCustomizedUserManagement.ValidateSecurityCode(sc: String);
+procedure TUserLevelUserManagement.ValidateSecurityCode(sc: String);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FValidadeSecurityCode) then
     FValidadeSecurityCode(sc);
 end;
 
-procedure TUserCustomizedUserManagement.RegisterSecurityCode(sc: String);
+procedure TUserLevelUserManagement.RegisterSecurityCode(sc: String);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   if Assigned(FRegisterSecurityCode) then
     FRegisterSecurityCode(sc);
 end;
 
-function TUserCustomizedUserManagement.CanAccess(sc: String): Boolean;
+function TUserLevelUserManagement.CanAccess(sc: String): Boolean;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   Result:=(Trim(sc)='');

@@ -114,7 +114,7 @@ begin
                                         TManageUsersAndGroupsAction,
                                         TSecureAction],nil);
 
-  RegisterComponents(SPascalSecurePalette,[TUserCustomizedUserManagement,
+  RegisterComponents(SPascalSecurePalette,[TUserLevelUserManagement,
                                            TGraphicalUsrMgntInterface]);
 
 
