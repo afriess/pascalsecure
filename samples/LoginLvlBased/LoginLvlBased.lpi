@@ -68,7 +68,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="10">
+    <Units Count="11">
       <Unit0>
         <Filename Value="LoginLvlBased.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -113,6 +113,10 @@
         <Filename Value="..\..\src\common\security.include.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
+      <Unit10>
+        <Filename Value="..\..\src\graphical\security.securemanager.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

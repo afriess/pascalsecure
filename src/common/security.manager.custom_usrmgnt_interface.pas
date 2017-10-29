@@ -31,23 +31,23 @@ type
 
   IUsrLevelMgntIntf = interface(ICustomUsrMgntIntf)
     ['{38D383C4-E162-4CF3-98A3-8EF4141AD681}']
-    //: Return the user management type.
-    function  UsrMgntType:TUsrMgntType;
-    //: Return the user management schema (all users, groups and authorizations, if availables).
-    function  GetUserSchema:TUsrMgntSchema;
-
-
-    {:
-    Updates some user detais, like description, user disabled,
-    user level access and authorizations.
-    }
-    function  UpdateUserDetails(const aUser:TCustomUser):Boolean;
-
-    //: Changes the user Password. Should be used in user administration interfaces.
-    function  ChangeUserPassword(const aUser:TCustomUser; const aPasswd:UTF8String):Boolean;
-
-    //: Changes password of current user.
-    function  ChangeCurrentUserPassword(const CurrentPass, NewPass:UTF8String):Boolean;
+    ////: Return the user management type.
+    //function  UsrMgntType:TUsrMgntType;
+    ////: Return the user management schema (all users, groups and authorizations, if availables).
+    //function  GetUserSchema:TUsrMgntSchema;
+    //
+    //
+    //{:
+    //Updates some user detais, like description, user disabled,
+    //user level access and authorizations.
+    //}
+    //function  UpdateUserDetails(const aUser:TCustomUser):Boolean;
+    //
+    ////: Changes the user Password. Should be used in user administration interfaces.
+    //function  ChangeUserPassword(const aUser:TCustomUser; const aPasswd:UTF8String):Boolean;
+    //
+    ////: Changes password of current user.
+    //function  ChangeCurrentUserPassword(const CurrentPass, NewPass:UTF8String):Boolean;
   end;
 {$endif UseLevelSchema}
 
@@ -78,6 +78,7 @@ type
 {$endif UseAuthSchema}
 
 
+  { TODO -oAndi : This is not an interface !! }
   TCustomUsrMgntInterface = class(TComponent)
   public
     function  Login(out aLogin, aPass:UTF8String):Boolean; virtual; abstract;
