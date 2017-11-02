@@ -10,10 +10,12 @@ uses
   security.manager.schema;
 
 type
-  TSecureLvlUsrMgntNotifyEvent = procedure(Sender:TObject; const aUser:TUserWithLevelAccess) of object;
-  TSecureLvlUsrMgntDelUsrEvent = procedure(Sender:TObject; var   aUser:TUserWithLevelAccess) of object;
+  TSecureLvlUsrMgntNotifyEvent   = procedure(Sender:TObject; const aUser:TUserWithLevelAccess) of object;
+  TSecureLvlUsrMgntDelUsrEvent   = procedure(Sender:TObject; var   aUser:TUserWithLevelAccess) of object;
+  TSecureLvlUsrMgntBlockUsrEvent = procedure(Sender:TObject; var   aUser:TUserWithLevelAccess; const Blocked:Boolean) of object;
 
   TSecureUsrLvlMgnt = class(TCustomUsrMgnt)
+    EnableUser: TAction;
     ChangePass: TAction;
     addUser: TAction;
     delUser: TAction;
@@ -29,6 +31,7 @@ type
     procedure ChangePassExecute(Sender: TObject);
     procedure delUserExecute(Sender: TObject);
     procedure DisableUserExecute(Sender: TObject);
+    procedure EnableUserExecute(Sender: TObject);
     procedure ListView1Editing(Sender: TObject; Item: TListItem;
       var AllowEdit: Boolean);
     procedure ListView1SelectItem(Sender: TObject; Item: TListItem;
@@ -36,16 +39,17 @@ type
   private
     FLevelLength: Integer;
     FOnAddUserClick: TNotifyEvent;
-    FOnBlockUserClick: TSecureLvlUsrMgntNotifyEvent;
+    FOnBlockUserClick: TSecureLvlUsrMgntBlockUsrEvent;
     FOnChangeUserClick: TSecureLvlUsrMgntNotifyEvent;
     FOnChangeUsrPassClick: TSecureLvlUsrMgntNotifyEvent;
     FOnDelUserClick: TSecureLvlUsrMgntDelUsrEvent;
     procedure ValidateSelectedUser(const aUser: TListItem);
+    procedure VerifySelected(Data: PtrInt);
   published
     property LevelLength:Integer                               read FLevelLength          write FLevelLength;
     property OnAddUserClick:TNotifyEvent                       read FOnAddUserClick       write FOnAddUserClick;
     property OnDelUserClick:TSecureLvlUsrMgntDelUsrEvent       read FOnDelUserClick       write FOnDelUserClick;
-    property OnBlockUserClick:TSecureLvlUsrMgntNotifyEvent     read FOnBlockUserClick     write FOnBlockUserClick;
+    property OnBlockUserClick:TSecureLvlUsrMgntBlockUsrEvent   read FOnBlockUserClick     write FOnBlockUserClick;
     property OnChangeUserClick:TSecureLvlUsrMgntNotifyEvent    read FOnChangeUserClick    write FOnChangeUserClick;
     property OnChangeUsrPassClick:TSecureLvlUsrMgntNotifyEvent read FOnChangeUsrPassClick write FOnChangeUsrPassClick;
 
@@ -76,6 +80,31 @@ begin
     raise ESecurityInvalidUserSelected.Create;
 end;
 
+procedure TSecureUsrLvlMgnt.VerifySelected(Data: PtrInt);
+var
+  res: Boolean;
+  Item: TListItem;
+begin
+  Item:=ListView1.Selected;
+  res:=(Item<>nil);
+  delUser.Enabled:=res;
+  ChangePass.Enabled:=res;
+  DisableUser.Enabled:=res;
+  EnableUser.Enabled:=false;
+
+  if res and (TObject(Item.Data) is TUserWithLevelAccess) then begin
+    if TUserWithLevelAccess(Item.Data).UserBlocked then begin
+      EnableUser.Enabled := true;
+      DisableUser.Enabled:= false;
+      ToolButton5.Action:=EnableUser;
+    end else begin
+      EnableUser.Enabled := false;
+      DisableUser.Enabled:= true;
+      ToolButton5.Action := DisableUser;
+    end;
+  end;
+end;
+
 procedure TSecureUsrLvlMgnt.addUserExecute(Sender: TObject);
 begin
   if Assigned(FOnAddUserClick) then
@@ -103,11 +132,27 @@ begin
 end;
 
 procedure TSecureUsrLvlMgnt.DisableUserExecute(Sender: TObject);
+var
+  ausr: TUserWithLevelAccess;
 begin
   ValidateSelectedUser(ListView1.Selected);
 
+  ausr:=TUserWithLevelAccess(ListView1.Selected.Data);
+
   if Assigned(FOnBlockUserClick) then
-    FOnBlockUserClick(Sender, TUserWithLevelAccess(ListView1.Selected.Data));
+    FOnBlockUserClick(Sender, ausr, true);
+end;
+
+procedure TSecureUsrLvlMgnt.EnableUserExecute(Sender: TObject);
+var
+  ausr: TUserWithLevelAccess;
+begin
+  ValidateSelectedUser(ListView1.Selected);
+
+  ausr:=TUserWithLevelAccess(ListView1.Selected.Data);
+
+  if Assigned(FOnBlockUserClick) then
+    FOnBlockUserClick(Sender, ausr, false);
 end;
 
 procedure TSecureUsrLvlMgnt.ListView1Editing(Sender: TObject; Item: TListItem;
@@ -118,13 +163,8 @@ end;
 
 procedure TSecureUsrLvlMgnt.ListView1SelectItem(Sender: TObject;
   Item: TListItem; Selected: Boolean);
-var
-  res: Boolean;
 begin
-  res:=(Item<>nil);
-  delUser.Enabled:=res;
-  ChangePass.Enabled:=res;
-  DisableUser.Enabled:=res;
+  Application.QueueAsyncCall(@VerifySelected,0);
 end;
 
 end.

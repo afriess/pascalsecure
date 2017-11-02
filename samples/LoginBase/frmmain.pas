@@ -119,7 +119,7 @@ begin
     with Schema as TUsrLevelMgntSchema do begin
       UserList.Add(0,TUserWithLevelAccess.Create(0,'root','Main administrator',false, 1));
       UserList.Add(1,TUserWithLevelAccess.Create(1,'andi','A user',            false, 1));
-      UserList.Add(2,TUserWithLevelAccess.Create(2,'user','Another user',      false, 10));
+      UserList.Add(2,TUserWithLevelAccess.Create(2,'user','Another user',      true,  10));
     end;
   end;
 end;

@@ -78,7 +78,7 @@ type
   private
     procedure LevelAddUserClick(Sender: TObject);
     procedure LevelBlockUserClick(Sender: TObject;
-      const aUser: TUserWithLevelAccess);
+      var aUser: TUserWithLevelAccess; const Blocked: Boolean);
     procedure LevelChangeUserClick(Sender: TObject;
       const aUser: TUserWithLevelAccess);
     procedure LevelChangeUserPassClick(Sender: TObject;
@@ -339,6 +339,13 @@ begin
   finally
     FreeAndNil(frm);
   end;
+end;
+
+procedure TGraphicalUsrMgntInterface.LevelBlockUserClick(Sender: TObject;
+  var aUser: TUserWithLevelAccess; const Blocked: Boolean);
+begin
+  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+
 end;
 
 procedure TGraphicalUsrMgntInterface.LevelBlockUserClick(Sender: TObject;
