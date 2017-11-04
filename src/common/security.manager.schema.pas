@@ -15,23 +15,23 @@ type
   IUsrLevelMgntInterface = interface
     ['{E3103A23-FFAE-4286-8565-C41038285EEF}']
     function LevelAddUser(const UserLogin, UserDescription, PlainPassword:UTF8String;
-                     const UsrLevel:Integer;
-                     const Blocked:Boolean;
-                     out   UID:Integer;
-                     out   UsrObject:TUserWithLevelAccess):Boolean;
+                          const UsrLevel:Integer;
+                          const Blocked:Boolean;
+                          out   UID:Integer;
+                          out   UsrObject:TUserWithLevelAccess):Boolean;
 
     function LevelDelUser(var UsrObject:TUserWithLevelAccess):Boolean;
 
-    function LevelUpdateUser(const UsrObject:TUserWithLevelAccess;
-                        const UserDescription, PlainPassword:UTF8String;
-                        const UsrLevel:Integer;
-                        const Blocked:Boolean):Boolean;
+    function LevelUpdateUser(var   UsrObject:TUserWithLevelAccess;
+                             const UserDescription, PlainPassword:UTF8String;
+                             const UsrLevel:Integer;
+                             const Blocked:Boolean):Boolean;
 
-    function LevelBlockUser(const UsrObject:TUserWithLevelAccess;
-                       const Blocked:Boolean):Boolean;
+    function LevelBlockUser(var   UsrObject:TUserWithLevelAccess;
+                            const Blocked:Boolean):Boolean;
 
-    function LevelChangeUserPass(const UsrObject:TUserWithLevelAccess;
-                            const PlainPassword:UTF8String):Boolean;
+    function LevelChangeUserPass(var   UsrObject:TUserWithLevelAccess;
+                                 const PlainPassword:UTF8String):Boolean;
 
   end;
 

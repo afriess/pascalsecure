@@ -9,7 +9,6 @@ object Form1: TForm1
   ClientWidth = 873
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '1.9.0.0'
   object SecureButton1: TSecureButton
     AnchorSideLeft.Control = BuLogout
     AnchorSideLeft.Side = asrBottom
@@ -128,6 +127,7 @@ object Form1: TForm1
     OnGetUserSchema = UserCustomizedUserManagement1GetUserSchema
     OnLevelAddUser = UserCustomizedUserManagement1LevelAddUser
     OnLevelDelUser = UserCustomizedUserManagement1LevelDelUser
+    OnLevelBlockUser = UserCustomizedUserManagement1LevelBlockUser
     Left = 151
     Top = 104
   end
