@@ -1,6 +1,6 @@
 unit security.manager.controls_manager;
 
-{$mode objfpc}{$H+}
+{$I security.include.inc}
 
 interface
 
@@ -13,168 +13,150 @@ type
 
   TFPGSecureControlsList = specialize TFPGList<ISecureControlInterface>;
 
-  { TControlSecurityManager }
+  { TControlSecurityManager } // Is a singleton, because we can only have one
 
-  TControlSecurityManager = class(TComponent)
-  private
+  TControlSecurityManager  = class(TComponent)
+  protected
     FSecureControls:TFPGSecureControlsList;
+  public
+    constructor create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure  RegisterControl(aControl: ISecureControlInterface);
+    procedure  UnRegisterControl(aControl: ISecureControlInterface);
+    procedure  SetControlSecurityCode(
+                    var CurrentSecurityCode: String;
+                    const NewSecurityCode: String;
+                    ControlSecurityIntf:ISecureControlInterface);
+    procedure  UpdateControls;
+    function   Count: Integer;
+  end;
+
+  { TSecureManager }
+
+  TSecureManager = class(TComponent)
   protected
     FUserManagement:TBasicUserManagement;
   protected
-    procedure SetUserManagement(um:TBasicUserManagement);
+    function GetControlSecurityManagerExt: TControlSecurityManager;
+    function GetUserManagement: TBasicUserManagement;
+    procedure SetUserManagement(aUserManagment:TBasicUserManagement);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    function   Login(Userlogin, Userpassword: String; var UID: Integer):Boolean; overload;
-    function   Login:Boolean;
-
-    procedure  Logout;
-    procedure  Manage;
-    function   GetCurrentUserlogin:String;
-    function   HasUserLoggedIn:Boolean;
-    procedure  TryAccess(sc:String);
-    procedure  RegisterControl(control:ISecureControlInterface);
-    procedure  UnRegisterControl(control:ISecureControlInterface);
-    function   RegisterControlCount:integer;
-    procedure  UpdateControls;
-    // if the SecurityContext is empty, per deault access is allowed
-    //   the Result is only realy checked if a context is given
-    function   CanAccess(sc:String):Boolean;
-    procedure  ValidateSecurityCode(sc:String);
-    procedure  RegisterSecurityCode(sc:String);
-    procedure  UnregisterSecurityCode(sc:String);
-    function   SecurityCodeExists(sc:String):Boolean;
-    function   GetRegisteredAccessCodes:TFPGStringList;
-    function   CheckIfUserIsAllowed(sc:String; RequireUserLogin:Boolean; var userlogin:String):Boolean;
+    //function   Login(Userlogin, Userpassword: String; var UID: Integer):Boolean; overload;
+    //function   Login:Boolean;
+    //
+    //procedure  Logout;
+    //procedure  Manage;
+    //function   GetCurrentUserlogin:String;
+    //function   HasUserLoggedIn:Boolean;
+    //procedure  TryAccess(sc:String);
+    //procedure RegisterControl(aControl: ISecureControlInterface);
+    //procedure UnRegisterControl(aControl: ISecureControlInterface);
+    //function   RegisterControlCount:integer;
+    //procedure  UpdateControls;
+    //// if the SecurityContext is empty, per deault access is allowed
+    ////   the Result is only realy checked if a context is given
+    //function   CanAccess(sc:String):Boolean;
+    //procedure  ValidateSecurityCode(sc:String);
+    //procedure  RegisterSecurityCode(sc:String);
+    //procedure  UnregisterSecurityCode(sc:String);
+    //function   SecurityCodeExists(sc:String):Boolean;
+    //function   GetRegisteredAccessCodes:TFPGStringList;
+    //function   CheckIfUserIsAllowed(sc:String; RequireUserLogin:Boolean; var userlogin:String):Boolean;
   published
-    property   UserManagement:TBasicUserManagement read FUserManagement write SetUserManagement;
+    property   UserManagement:TBasicUserManagement read GetUserManagement write SetUserManagement;
+    property   ControlSecurityManager: TControlSecurityManager read GetControlSecurityManagerExt;
   end;
 
-  function GetControlSecurityManager:TControlSecurityManager;
-  procedure SetControlSecurityCode(var CurrentSecurityCode:String; const NewSecurityCode:String; ControlSecurityIntf:ISecureControlInterface);
+
+function  GetControlSecurityManager: TControlSecurityManager;
+{ TODO -oAndi : Should be replaced by GetControlSecuritymanager.SetControlSecurityCode in the components}
+procedure SetControlSecurityCode(var CurrentSecurityCode:String; const NewSecurityCode:String; ControlSecurityIntf:ISecureControlInterface);
 
 implementation
-
+{$ifdef debug_secure}
 uses
-  {$ifdef debug_secure}
-  LazLogger,
-  {$endif}
-  security.exceptions;
+  LazLogger;
+{$endif}
 
-constructor TControlSecurityManager.Create(AOwner: TComponent);
+
+var
+ CSM: TControlSecurityManager;
+
+function GetControlSecurityManager: TControlSecurityManager;
+begin
+  Result:= CSM;
+end;
+
+procedure SetControlSecurityCode(var CurrentSecurityCode: String;
+  const NewSecurityCode: String; ControlSecurityIntf: ISecureControlInterface);
+begin
+  GetControlSecurityManager.SetControlSecurityCode(CurrentSecurityCode, NewSecurityCode, ControlSecurityIntf);
+end;
+
+{ TControlSecurityManager }
+
+constructor TControlSecurityManager.create(AOwner: TComponent);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  inherited Create(AOwner);
-  // Usermanagment should be nil, because nobody knows what kind of uermangement we need
-  FUserManagement:=nil;
+  inherited create(AOwner);
   FSecureControls:=TFPGSecureControlsList.Create;
 end;
 
 destructor TControlSecurityManager.Destroy;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FSecureControls.Count>0 then
-    raise EControlSecurityManagerStillBeingUsed.Create;
   FreeAndNil(FSecureControls);
   inherited Destroy;
 end;
 
-function TControlSecurityManager.Login(Userlogin, Userpassword: String; var UID:Integer): Boolean; overload;
+procedure TControlSecurityManager.RegisterControl(
+  aControl: ISecureControlInterface);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FUserManagement<>nil then
-    Result:=TBasicUserManagement(FUserManagement).Login(Userlogin,Userpassword,UID)
-  else
-    Result:=false;
-end;
-
-function   TControlSecurityManager.Login:Boolean;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FUserManagement<>nil then
-    Result:=TBasicUserManagement(FUserManagement).Login
-  else
-    Result:=false;
-end;
-
-procedure  TControlSecurityManager.Logout;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FUserManagement<>nil then
-    TBasicUserManagement(FUserManagement).Logout
-end;
-
-procedure  TControlSecurityManager.Manage;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FUserManagement<>nil then
-    TBasicUserManagement(FUserManagement).Manage;
-end;
-
-function TControlSecurityManager.GetCurrentUserlogin: String;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Result:='';
-  if FUserManagement<>nil then
-    Result:=TBasicUserManagement(FUserManagement).CurrentUserLogin;
-end;
-
-function TControlSecurityManager.HasUserLoggedIn: Boolean;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Result:=false;
-  if FUserManagement<>nil then
-    Result:=TBasicUserManagement(FUserManagement).UserLogged;
-end;
-
-procedure  TControlSecurityManager.TryAccess(sc:String);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FUserManagement<>nil then
-    if not TBasicUserManagement(FUserManagement).CanAccess(sc) then
-      raise ESecuritySystemAccessDenied.Create(sc);
-end;
-
-procedure TControlSecurityManager.SetUserManagement(um: TBasicUserManagement);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if (um<>nil) and (not (um is TBasicUserManagement)) then
-    raise EInvalidUserManagementComponent.Create;
-
-  { TODO -oAndi : why check we this ? }
-  //if (um<>nil) and (FUserManagement<>nil) then
-  //  raise EUserManagementIsSet.Create;
-
-  FUserManagement:=um;
-  UpdateControls;
-end;
-
-procedure  TControlSecurityManager.RegisterControl(control:ISecureControlInterface);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FSecureControls.IndexOf(control)=-1 then begin;
-    FSecureControls.Add(control);
-    control.CanBeAccessed(CanAccess(control.GetControlSecurityCode));
+  if FSecureControls.IndexOf(aControl)=-1 then begin;
+    FSecureControls.Add(aControl);
+    { TODO -oaf : I set the default behavior to false - you can later change to the correct value if a usermanager is installed }
+    aControl.CanBeAccessed(false);
+    //aControl.CanBeAccessed(CanAccess(aControl.GetControlSecurityCode));
   end;
 end;
 
-procedure  TControlSecurityManager.UnRegisterControl(control:ISecureControlInterface);
+procedure TControlSecurityManager.UnRegisterControl(
+  aControl: ISecureControlInterface);
 var
-  idx:LongInt;
+  idx: LongInt;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  idx:=FSecureControls.IndexOf(control);
+  idx:= FSecureControls.IndexOf(aControl);
   if idx<>-1 then
     FSecureControls.Delete(idx);
 end;
 
-function TControlSecurityManager.RegisterControlCount: integer;
+procedure TControlSecurityManager.SetControlSecurityCode(
+  var CurrentSecurityCode: String; const NewSecurityCode: String;
+  ControlSecurityIntf: ISecureControlInterface);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Result:= FSecureControls.Count;
+  if CurrentSecurityCode=NewSecurityCode then Exit;
+
+  if Trim(NewSecurityCode)='' then
+    ControlSecurityIntf.MakeUnsecure; // no securitycode mean -> make unsecure
+  else
+    with GetControlSecurityManager do begin
+      ValidateSecurityCode(NewSecurityCode);
+      if not SecurityCodeExists(NewSecurityCode) then
+        RegisterSecurityCode(NewSecurityCode);
+
+      ControlSecurityIntf.CanBeAccessed(CanAccess(NewSecurityCode));
+    end;
+
+  CurrentSecurityCode:=NewSecurityCode;
+
 end;
 
-procedure  TControlSecurityManager.UpdateControls;
+procedure TControlSecurityManager.UpdateControls;
 var
   c:LongInt;
   intf: ISecureControlInterface;
@@ -186,111 +168,90 @@ begin
   end;
 end;
 
-function   TControlSecurityManager.CanAccess(sc:String):Boolean;
+function TControlSecurityManager.Count: Integer;
 begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  { TODO -oFabio : what is the expected behavior ?}
-  Result:=false;
-  if sc='' then begin
-    Result:=true;
-    exit;
-  end;
-  if (FUserManagement<>nil) and (FUserManagement is TBasicUserManagement) then
-    Result:=TBasicUserManagement(FUserManagement).CanAccess(sc);
+  Result:= FSecureControls.Count;
 end;
 
-procedure  TControlSecurityManager.ValidateSecurityCode(sc:String);
+{ TSecureManager }
+
+function TSecureManager.GetControlSecurityManagerExt: TControlSecurityManager;
 begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FUserManagement<>nil then
-    TBasicUserManagement(FUserManagement).ValidateSecurityCode(sc);
+  Result:= GetControlSecurityManager;
 end;
 
-procedure  TControlSecurityManager.RegisterSecurityCode(sc:String);
+function TSecureManager.GetUserManagement: TBasicUserManagement;
 begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FUserManagement<>nil then
-    TBasicUserManagement(FUserManagement).RegisterSecurityCode(sc);
+  Result:= FUserManagement;
 end;
 
-procedure  TControlSecurityManager.UnregisterSecurityCode(sc:String);
-var
-  being_used:Boolean;
-  c:LongInt;
+procedure TSecureManager.SetUserManagement(aUserManagment: TBasicUserManagement);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  being_used:=false;
-  for c:=0 to FSecureControls.Count-1 do
-    being_used:=being_used or (ISecureControlInterface(FSecureControls.Items[c]).GetControlSecurityCode=sc);
-
-  if being_used then
-    raise ESecurityCodeIsInUseYet.Create;
-
-  if FUserManagement<>nil then
-    TBasicUserManagement(FUserManagement).UnregisterSecurityCode(sc);
+  //if (aUserManagment<>nil) and (not (aUserManagment is TBasicUserManagement)) then
+  //  raise EInvalidUserManagementComponent.Create;
+  //
+  //{ TODO -oAndi : why check we this ? }
+  ////if (um<>nil) and (FUserManagement<>nil) then
+  ////  raise EUserManagementIsSet.Create;
+  //
+  FUserManagement:=aUserManagment;
+  UpdateControls;
 end;
 
-function   TControlSecurityManager.SecurityCodeExists(sc:String):Boolean;
+constructor TSecureManager.Create(AOwner: TComponent);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Result:=false;
-  if FUserManagement<>nil then
-    Result:=TBasicUserManagement(FUserManagement).SecurityCodeExists(sc);
+  inherited Create(AOwner);
+  // Usermanagment should be nil, because nobody knows what kind of uermangement we need
+  FUserManagement:=nil;
+  //FSecureControls:=TFPGSecureControlsList.Create;
 end;
 
-function TControlSecurityManager.GetRegisteredAccessCodes: TFPGStringList;
+destructor TSecureManager.Destroy;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if FUserManagement=nil then begin
-    Result:=TFPGStringList.Create
-  end else
-    Result:=TBasicUserManagement(FUserManagement).GetRegisteredAccessCodes;
+  //if FSecureControls.Count>0 then
+  //  raise EControlSecurityManagerStillBeingUsed.Create;
+  //FreeAndNil(FSecureControls);
+  inherited Destroy;
 end;
 
-function TControlSecurityManager.CheckIfUserIsAllowed(sc: String;
-  RequireUserLogin: Boolean; var userlogin: String): Boolean;
+procedure TSecureManager.UpdateControls;
 begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Result:=false;
-  if FUserManagement<>nil then
-    Result:=TBasicUserManagement(FUserManagement).CheckIfUserIsAllowed(sc, RequireUserLogin, userlogin);
+
 end;
 
-var
-  QControlSecurityManager:TControlSecurityManager;
+//procedure TSecureManager.RegisterControl(aControl: ISecureControlInterface);
+//begin
+//
+//end;
 
-function GetControlSecurityManager: TControlSecurityManager;
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  Result:=QControlSecurityManager;
-end;
+//procedure TSecureManager.UnRegisterControl(aControl: ISecureControlInterface);
+//begin
+//  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+//end;
 
-procedure SetControlSecurityCode(var CurrentSecurityCode: String;
-  const NewSecurityCode: String; ControlSecurityIntf: ISecureControlInterface);
-begin
-  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if CurrentSecurityCode=NewSecurityCode then Exit;
-
-  if Trim(NewSecurityCode)='' then
-    ControlSecurityIntf.CanBeAccessed(true)
-  else
-    with GetControlSecurityManager do begin
-      ValidateSecurityCode(NewSecurityCode);
-      if not SecurityCodeExists(NewSecurityCode) then
-        RegisterSecurityCode(NewSecurityCode);
-
-      ControlSecurityIntf.CanBeAccessed(CanAccess(NewSecurityCode));
-    end;
-
-  CurrentSecurityCode:=NewSecurityCode;
-end;
+//procedure TLevelManager.UpdateControls;
+//var
+//  c:LongInt;
+//  intf: ISecureControlInterface;
+//begin
+//  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+//  for c:=0 to FSecureControls.Count-1 do begin
+//    intf:=ISecureControlInterface(FSecureControls.Items[c]);
+//    intf.CanBeAccessed(CanAccess(intf.GetControlSecurityCode));
+//  end;
+//end;
 
 initialization
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  QControlSecurityManager:=TControlSecurityManager.Create(nil);
+  CSM:= TControlSecurityManager.create(nil);
+
 finalization
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  FreeAndNil(QControlSecurityManager);
+  if (CSM <> nil) then
+    FreeAndNil(CSM);
 
 end.
 
