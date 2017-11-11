@@ -78,7 +78,7 @@ type
   private
     procedure LevelAddUserClick(Sender: TObject);
     procedure LevelBlockUserClick(Sender: TObject;
-      const aUser: TUserWithLevelAccess);
+      var aUser: TUserWithLevelAccess; const Blocked: Boolean);
     procedure LevelChangeUserClick(Sender: TObject;
       const aUser: TUserWithLevelAccess);
     procedure LevelChangeUserPassClick(Sender: TObject;
@@ -130,6 +130,13 @@ ResourceString
   strConfirmDeleteUser   = 'Confirm the complete removal of user "%s"?';
   strYesDeleteTheUser    = 'Yes, delete user "%s"';
   strNoKeepIt            = 'No, keep it intact!';
+  strDisableUser         = 'Block/Disable user confirmation';
+  strEnableUser          = 'Unblock/Enable user  confirmation';
+  strUserWillBeBlocked   = 'The user "%s" will be blocked/disabled. Do you confirm?';
+  strUserWillBeUnBlocked = 'The user "%s" will be unblocked/enabled. Do you confirm?';
+  strYesDisableIt        = 'Yes, disable the user "%s"';
+  strYesEnableIt         = 'Yes, enable the user "%s"';
+
 
 implementation
 
@@ -342,10 +349,40 @@ begin
 end;
 
 procedure TGraphicalUsrMgntInterface.LevelBlockUserClick(Sender: TObject;
-  const aUser: TUserWithLevelAccess);
+  var aUser: TUserWithLevelAccess; const Blocked: Boolean);
+var
+  response, a, b, c, d, e: Boolean;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  a:=Assigned(FCurrentUserSchema);
+  b:=(FCurrentUserSchema is TUsrLevelMgntSchema);
+  c:=Supports(TUsrLevelMgntSchema(FCurrentUserSchema).LevelInterface, IUsrLevelMgntInterface);
+  d:=Assigned(aUser);
+  e:=Assigned(lvlfrm);
 
+  if (a=false) or (b=false) or (c=false) or (d=false) or (e=false) then
+    raise EInvalidUsrMgntSchema.Create;
+
+  response:=false;
+  if Blocked then
+    response:=QuestionDlg(strDisableUser,
+                          Format(strUserWillBeBlocked,[aUser.Login]),
+                          mtConfirmation,
+                          [mrYes, Format(strYesDisableIt,[aUser.Login]), mrNo, strNoKeepIt, 'IsDefault'],
+                          0)=mrYes
+  else
+    response:=QuestionDlg(strEnableUser,
+                          Format(strUserWillBeUnBlocked,[aUser.Login]),
+                          mtConfirmation,
+                          [mrYes, Format(strYesEnableIt,[aUser.Login]), mrNo, strNoKeepIt, 'IsDefault'],
+                          0)=mrYes;
+
+  if response then begin
+    if TUsrLevelMgntSchema(FCurrentUserSchema).LevelInterface.LevelBlockUser(aUser, Blocked) then begin
+      aUser.ResetModified;
+      LevelRefreshUserList;
+    end;
+  end;
 end;
 
 procedure TGraphicalUsrMgntInterface.LevelChangeUserClick(Sender: TObject;

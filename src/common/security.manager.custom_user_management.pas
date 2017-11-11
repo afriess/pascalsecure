@@ -29,17 +29,17 @@ type
                                          const aBlocked:Boolean;
                                          out   aUID:Integer;
                                          out   Result:Boolean) of object;
-  TLevelDelUser              = procedure(Const aUsrObject:TUserWithLevelAccess;
+  TLevelDelUser              = procedure(var   aUsrObject:TUserWithLevelAccess;
                                          out   Result:Boolean) of object;
-  TLevelUpdateUser           = procedure(const aUsrObject:TUserWithLevelAccess;
+  TLevelUpdateUser           = procedure(var   aUsrObject:TUserWithLevelAccess;
                                          const aUserDescription, aPlainPassword:UTF8String;
                                          const aUsrLevel:Integer;
                                          const aBlocked:Boolean;
                                          out   Result:Boolean) of object;
-  TLevelBlockUser            = procedure(const aUsrObject:TUserWithLevelAccess;
+  TLevelBlockUser            = procedure(var   aUsrObject:TUserWithLevelAccess;
                                          const aBlocked:Boolean;
                                          out   Result:Boolean) of object;
-  TLevelChangeUserPass       = procedure(const aUsrObject:TUserWithLevelAccess;
+  TLevelChangeUserPass       = procedure(var   aUsrObject:TUserWithLevelAccess;
                                          const aPlainPassword:UTF8String;
                                          out   Result:Boolean) of object;
 
@@ -85,15 +85,15 @@ type
 
     function LevelDelUser(var  aUsrObject:TUserWithLevelAccess):Boolean;
 
-    function LevelUpdateUser(const aUsrObject:TUserWithLevelAccess;
+    function LevelUpdateUser(var   aUsrObject:TUserWithLevelAccess;
                              const aUserDescription, aPlainPassword:UTF8String;
                              const aUsrLevel:Integer;
                              const aBlocked:Boolean):Boolean;
 
-    function LevelBlockUser(const aUsrObject:TUserWithLevelAccess;
+    function LevelBlockUser(var   aUsrObject:TUserWithLevelAccess;
                             const aBlocked:Boolean):Boolean;
 
-    function LevelChangeUserPass(const aUsrObject:TUserWithLevelAccess;
+    function LevelChangeUserPass(var   aUsrObject:TUserWithLevelAccess;
                                  const aPlainPassword:UTF8String):Boolean;
   public
     procedure Logout; override;
@@ -269,13 +269,15 @@ begin
 end;
 
 function TUserLevelUserManagement.LevelBlockUser(
-  const aUsrObject: TUserWithLevelAccess; const aBlocked: Boolean): Boolean;
+  var aUsrObject: TUserWithLevelAccess; const aBlocked: Boolean): Boolean;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
+  if Assigned(FLevelBlockUser) then
+    FLevelBlockUser(aUsrObject, aBlocked, Result);
 end;
 
 function TUserLevelUserManagement.LevelChangeUserPass(
-  const aUsrObject: TUserWithLevelAccess; const aPlainPassword: UTF8String
+  var aUsrObject: TUserWithLevelAccess; const aPlainPassword: UTF8String
   ): Boolean;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
