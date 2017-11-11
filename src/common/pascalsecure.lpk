@@ -24,8 +24,8 @@
         <UnitName Value="security.manager.basic_user_management"/>
       </Item2>
       <Item3>
-        <Filename Value="security.manager.controls_manager.pas"/>
-        <UnitName Value="security.manager.controls_manager"/>
+        <Filename Value="security.manager.controls_manager_old.pas"/>
+        <UnitName Value="security.manager.controls_manager_old"/>
       </Item3>
       <Item4>
         <Filename Value="security.manager.custom_user_management.pas"/>

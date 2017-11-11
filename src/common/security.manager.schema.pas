@@ -110,15 +110,15 @@ type
 
     function LevelDelUser(var UsrObject:TUserWithLevelAccess):Boolean;
 
-    function LevelUpdateUser(const UsrObject:TUserWithLevelAccess;
+    function LevelUpdateUser(var UsrObject:TUserWithLevelAccess;
                         const UserDescription, PlainPassword:UTF8String;
                         const UsrLevel:Integer;
                         const Blocked:Boolean):Boolean;
 
-    function LevelBlockUser(const UsrObject:TUserWithLevelAccess;
+    function LevelBlockUser(var UsrObject:TUserWithLevelAccess;
                        const Blocked:Boolean):Boolean;
 
-    function LevelChangeUserPass(const UsrObject:TUserWithLevelAccess;
+    function LevelChangeUserPass(var UsrObject:TUserWithLevelAccess;
                             const PlainPassword:UTF8String):Boolean;
 
   end;

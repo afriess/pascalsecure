@@ -261,7 +261,7 @@ begin
 end;
 
 function TUserLevelUserManagement.LevelUpdateUser(
-  const aUsrObject: TUserWithLevelAccess; const aUserDescription,
+  var aUsrObject: TUserWithLevelAccess; const aUserDescription,
   aPlainPassword: UTF8String; const aUsrLevel: Integer; const aBlocked: Boolean
   ): Boolean;
 begin
