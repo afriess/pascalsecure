@@ -15,11 +15,11 @@ type
 
   { TControlSecurityManager } // Is a singleton, because we can only have one
 
-  TControlSecurityManager  = class(TComponent)
+  TControlSecurityManager  = class(TObject)
   protected
     FSecureControls:TFPGSecureControlsList;
   public
-    constructor create(AOwner: TComponent); override;
+    constructor Create;
     destructor Destroy; override;
     procedure  RegisterControl(aControl: ISecureControlInterface);
     procedure  UnRegisterControl(aControl: ISecureControlInterface);
@@ -97,10 +97,10 @@ end;
 
 { TControlSecurityManager }
 
-constructor TControlSecurityManager.create(AOwner: TComponent);
+constructor TControlSecurityManager.create;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  inherited create(AOwner);
+  inherited create;
   FSecureControls:=TFPGSecureControlsList.Create;
 end;
 
@@ -142,14 +142,15 @@ begin
   if CurrentSecurityCode=NewSecurityCode then Exit;
 
   if Trim(NewSecurityCode)='' then
-    ControlSecurityIntf.MakeUnsecure; // no securitycode mean -> make unsecure
+    ControlSecurityIntf.MakeUnsecure // no securitycode mean -> make unsecure
   else
     with GetControlSecurityManager do begin
-      ValidateSecurityCode(NewSecurityCode);
-      if not SecurityCodeExists(NewSecurityCode) then
-        RegisterSecurityCode(NewSecurityCode);
-
-      ControlSecurityIntf.CanBeAccessed(CanAccess(NewSecurityCode));
+      { TODO -oaf : if it is clear where the manager resides i can work here }
+      //ValidateSecurityCode(NewSecurityCode);
+      //if not SecurityCodeExists(NewSecurityCode) then
+      //  RegisterSecurityCode(NewSecurityCode);
+      //
+      //ControlSecurityIntf.CanBeAccessed(CanAccess(NewSecurityCode));
     end;
 
   CurrentSecurityCode:=NewSecurityCode;
@@ -164,7 +165,8 @@ begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   for c:=0 to FSecureControls.Count-1 do begin
     intf:=ISecureControlInterface(FSecureControls.Items[c]);
-    intf.CanBeAccessed(CanAccess(intf.GetControlSecurityCode));
+    { TODO -oaf : if it is clear where the manager resides i can work here }
+//    intf.CanBeAccessed(CanAccess(intf.GetControlSecurityCode));
   end;
 end;
 
@@ -196,7 +198,8 @@ begin
   ////  raise EUserManagementIsSet.Create;
   //
   FUserManagement:=aUserManagment;
-  UpdateControls;
+  { TODO -oaf : if it is clear where the manager resides i can work here }
+  //UpdateControls;
 end;
 
 constructor TSecureManager.Create(AOwner: TComponent);
@@ -217,11 +220,11 @@ begin
   inherited Destroy;
 end;
 
-procedure TSecureManager.UpdateControls;
-begin
-
-end;
-
+//procedure TSecureManager.UpdateControls;
+//begin
+//
+//end;
+//
 //procedure TSecureManager.RegisterControl(aControl: ISecureControlInterface);
 //begin
 //
@@ -246,7 +249,7 @@ end;
 
 initialization
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  CSM:= TControlSecurityManager.create(nil);
+  CSM:= TControlSecurityManager.create;
 
 finalization
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}

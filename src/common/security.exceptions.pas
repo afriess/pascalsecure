@@ -155,9 +155,10 @@ end;
 
 constructor ESecuritySystemAccessDenied.Create(Token: UTF8String);
 begin
-  if GetControlSecurityManager.HasUserLoggedIn then
-    inherited Create(Format(SUserHasNotAllowedToAccessObject,[GetControlSecurityManager.GetCurrentUserlogin, Token]))
-  else
+  { TODO -oaf : if it is clear where the manager resides i can work here }
+  //if GetControlSecurityManager.HasUserLoggedIn then
+  //  inherited Create(Format(SUserHasNotAllowedToAccessObject,[GetControlSecurityManager.GetCurrentUserlogin, Token]))
+  //else
     inherited Create(Format(SNoUserLoggedInToAccessObject,[Token]));
 end;
 

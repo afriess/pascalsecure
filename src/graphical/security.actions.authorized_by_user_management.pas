@@ -76,7 +76,8 @@ procedure TAuthByUserMgntAction.SetDisableIfNotAuthorized(
 begin
   if FDisableIfNotAuthorized=AValue then Exit;
   FDisableIfNotAuthorized:=AValue;
-  CanBeAccessed(GetControlSecurityManager.CanAccess(FSecurityCode));
+  { TODO -oaf : if it is clear where the manager resides i can work here }
+  //CanBeAccessed(GetControlSecurityManager.CanAccess(FSecurityCode));
 end;
 
 procedure TAuthByUserMgntAction.SetEnabled(AValue: Boolean);

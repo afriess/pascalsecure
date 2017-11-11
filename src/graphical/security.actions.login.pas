@@ -28,9 +28,11 @@ implementation
 
 procedure TLoginAction.CanBeAccessed(a: Boolean);
 begin
-  if GetControlSecurityManager.UserManagement<>nil then
-    with GetControlSecurityManager.UserManagement as TBasicUserManagement do
-      inherited CanBeAccessed(not UserLogged);
+  { TODO -oaf : if it is clear where the manager resides i can work here }
+//
+//  if GetControlSecurityManager.UserManagement<>nil then
+//    with GetControlSecurityManager.UserManagement as TBasicUserManagement do
+//      inherited CanBeAccessed(not UserLogged);
 end;
 
 procedure TLoginAction.UpdateTarget(Target: TObject);
@@ -40,7 +42,8 @@ end;
 
 procedure TLoginAction.ExecuteTarget(Target: TObject);
 begin
-  GetControlSecurityManager.Login;
+  { TODO -oaf : if it is clear where the manager resides i can work here }
+//  GetControlSecurityManager.Login;
 end;
 
 end.
