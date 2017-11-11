@@ -4,11 +4,13 @@
 
 unit pascalsecure;
 
+{$warn 5023 off : no warning about unused units}
 interface
 
 uses
   security.exceptions, security.manager.basic_user_management, 
-  security.manager.controls_manager, security.manager.custom_user_management, 
+  security.manager.controls_manager_old, 
+  security.manager.custom_user_management, 
   security.manager.custom_usrmgnt_interface, security.manager.schema, 
   security.texts, pascalsecure_reg, LazarusPackageIntf;
 

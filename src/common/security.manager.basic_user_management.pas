@@ -207,8 +207,9 @@ end;
 destructor  TBasicUserManagement.Destroy;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  if GetControlSecurityManager.UserManagement=Self then
-    GetControlSecurityManager.UserManagement:=nil;
+  { TODO -oaf : if it is clear where the manager resides i can work here }
+  //if GetControlSecurityManager.UserManagement=Self then
+  //  GetControlSecurityManager.UserManagement:=nil;
 
   if FRegisteredSecurityCodes<>nil then
     FRegisteredSecurityCodes.Destroy;
