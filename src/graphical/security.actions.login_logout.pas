@@ -124,16 +124,18 @@ end;
 
 procedure TLogin_LogoutAction.UpdateMyState;
 begin
-  if GetControlSecurityManager.UserManagement<>nil then
-    if TBasicUserManagement(GetControlSecurityManager.UserManagement).UserLogged then begin
-      inherited Caption   :=FWithUserLoggedInCaption;
-      inherited Hint      :=FWithUserLoggedInHint;
-      inherited ImageIndex:=FWithUserLoggedInImageIndex;
-    end else begin
-      inherited Caption   :=FWithoutUserLoggedInCaption;
-      inherited Hint      :=FWithoutUserLoggedInHint;
-      inherited ImageIndex:=FWithoutUserLoggedInImageIndex;
-    end;
+  with GetControlSecurityManager do begin
+    if SecureManager is TBasicSecureManager then
+      if TBasicUserManagement(SecureManager.UserManagement).UserLogged then begin
+        inherited Caption   :=FWithUserLoggedInCaption;
+        inherited Hint      :=FWithUserLoggedInHint;
+        inherited ImageIndex:=FWithUserLoggedInImageIndex;
+      end else begin
+        inherited Caption   :=FWithoutUserLoggedInCaption;
+        inherited Hint      :=FWithoutUserLoggedInHint;
+        inherited ImageIndex:=FWithoutUserLoggedInImageIndex;
+      end;
+  end;
 end;
 
 procedure TLogin_LogoutAction.CanBeAccessed(a: Boolean);
