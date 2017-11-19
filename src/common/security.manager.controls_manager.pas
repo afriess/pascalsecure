@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, fgl,
-  security.manager.basic_user_management,
+  {security.manager.basic_user_management,}
   security.manager.SecureControlInterface;
 
 type

@@ -5,8 +5,8 @@ unit security.manager.SecureControlInterface;
 interface
 
 uses
-  Classes, SysUtils, fgl,
-  security.manager.basic_user_management;
+  Classes, SysUtils{, fgl,
+  security.manager.basic_user_management};
 
 type
 
