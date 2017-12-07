@@ -33,7 +33,7 @@ begin
 
 end;
 
-
+// to access the protected properties, function and procedures
 type
   TDUTCustomBasicUserManagment = class(TCustomBasicUserManagment)
   public

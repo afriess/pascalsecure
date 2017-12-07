@@ -1,13 +1,11 @@
 program GUITest_Common;
 
-{$I PSECinclude.inc}
+{$mode objfpc}{$H+}
 
 uses
-  Interfaces, Forms, GuiTestRunner,  pascalsecure
-  ,TestSecurityManagerSchema
-  //,TestPSECcontrolsmanager  { TODO -oAndi : I have to Backport this }
-  ,TestControlsManager
-  ;
+  Interfaces, Forms, GuiTestRunner, TestSecurityManagerSchema,
+  TestBasicUserManagement, TestControlsManager, MockSecureControl,
+  security.manager.schema, security.manager.controls_manager;
 
 {$R *.res}
 

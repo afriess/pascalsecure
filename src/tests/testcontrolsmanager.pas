@@ -1,6 +1,6 @@
 unit TestControlsManager;
 
-{$I PSECinclude.inc}
+{$mode objfpc}{$H+}
 
 interface
 
@@ -59,15 +59,14 @@ end;
 procedure TTestControls_manager.TST_CSM_Control;
 var
   CntrlA : TMockSecureControl;
-  dummystr: String;
 begin
   AssertNotNull('Not correct created object',DUT);
   CntrlA:= nil;
-  TMockSecureControl.TSTControlManager:= DUT;
+  TMockSecureControl.TSTControlSecurityManager:= DUT;
   AssertEquals('DUT RegisterControlCount',DUT.RegisterControlCount,0);
   CntrlA:= TMockSecureControl.Create(nil);
   AssertNotNull('Not correct created object',CntrlA);
-  AssertSame('DUT in Cntrl',DUT,CntrlA.TSTControlManager);
+  AssertSame('DUT in Cntrl',DUT,CntrlA.TSTControlSecurityManager);
   AssertEquals('DUT RegisterControlCount after controladd',DUT.RegisterControlCount,1);
   AssertEquals('GetControlSecurityCode wrong result',CntrlA.GetControlSecurityCode,'');
   CntrlA.SecurityCode:='xAxA';
@@ -87,7 +86,8 @@ begin
   CntrlA.CanBeAccessed(True);
   AssertEquals('inherited Enabled wrong result True/True',CntrlA.TSTIsEnabledInherited,True);
   CntrlA.Free;
-  TMockSecureControl.TSTControlManager:= nil;
+  AssertEquals('DUT RegisterControlCount after control free',DUT.RegisterControlCount,0);
+  TMockSecureControl.TSTControlSecurityManager:= nil;
 end;
 
 initialization
