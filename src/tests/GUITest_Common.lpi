@@ -22,24 +22,18 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="5">
+    <RequiredPackages Count="3">
       <Item1>
-        <PackageName Value="pascalsecure"/>
+        <PackageName Value="fpcunittestrunner"/>
       </Item1>
       <Item2>
-        <PackageName Value="pascalsecure_visual"/>
+        <PackageName Value="LCL"/>
       </Item2>
       <Item3>
-        <PackageName Value="fpcunittestrunner"/>
-      </Item3>
-      <Item4>
-        <PackageName Value="LCL"/>
-      </Item4>
-      <Item5>
         <PackageName Value="FCL"/>
-      </Item5>
+      </Item3>
     </RequiredPackages>
-    <Units Count="5">
+    <Units Count="8">
       <Unit0>
         <Filename Value="GUITest_Common.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -64,6 +58,19 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="MockSecureControl"/>
       </Unit4>
+      <Unit5>
+        <Filename Value="..\common\security.manager.schema.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="..\common\security.manager.controls_manager.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="..\common\security.manager.securecontrolinterface.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="security.manager.SecureControlInterface"/>
+      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -74,6 +81,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="..\common"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>
