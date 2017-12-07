@@ -20,7 +20,7 @@ var
 
 implementation
 uses
-  PSEC_controls_manager;
+  PSECcontrolsManager;
 
 {$R *.lfm}
 

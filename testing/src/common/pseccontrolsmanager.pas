@@ -1,4 +1,4 @@
-unit PSECcontrolsmanager;
+unit PSECcontrolsManager;
 
 {$I PSECinclude.inc}
 
