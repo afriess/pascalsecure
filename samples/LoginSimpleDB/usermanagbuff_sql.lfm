@@ -1,0 +1,109 @@
+inherited UserManagementSQL: TUserManagementSQL
+  OnCreate = DataModuleCreate
+  Height = 308
+  HorizontalOffset = 347
+  VerticalOffset = 280
+  Width = 548
+  PPI = 96
+  object Q_Login: TZQuery[0]
+    Connection = SQLCon1
+    SQL.Strings = (
+      'SELECT [UserID]'
+      '      ,[Username]'
+      '      ,[Userpasswort]'
+      '      ,[BerechtigungID]'
+      '      ,[NameBerechtigung]'
+      '      ,[Aktiv]'
+      '  FROM '
+      '     [V_LoginInfo]'
+      ''
+    )
+    Params = <>
+    Left = 32
+    Top = 72
+    object Q_LoginUserID: TSmallintField
+      FieldKind = fkData
+      FieldName = 'UserID'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+    end
+    object Q_LoginUsername: TStringField
+      FieldKind = fkData
+      FieldName = 'Username'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 200
+    end
+    object Q_LoginUserpasswort: TStringField
+      FieldKind = fkData
+      FieldName = 'Userpasswort'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 200
+    end
+    object Q_LoginBerechtigungID: TLongintField
+      FieldKind = fkData
+      FieldName = 'BerechtigungID'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+    end
+    object Q_LoginNameBerechtigung: TStringField
+      FieldKind = fkData
+      FieldName = 'NameBerechtigung'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 1020
+    end
+    object Q_LoginAktiv: TStringField
+      FieldKind = fkData
+      FieldName = 'Aktiv'
+      Index = 5
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 1020
+    end
+  end
+  object SQLCon1: TZConnection[1]
+    ControlsCodePage = cCP_UTF8
+    AutoEncodeStrings = False
+    ClientCodepage = 'ISO-8859-1'
+    Properties.Strings = (
+      'AutoEncodeStrings=ON'
+      'codepage=ISO-8859-1'
+    )
+    HostName = 'LAPWINDEV'
+    Port = 0
+    Database = 'Wastl_admin'
+    Protocol = 'FreeTDS_MsSQL>=2005'
+    Left = 32
+    Top = 16
+  end
+  object BuffData: TSdfDataSet[2]
+    FileMustExist = False
+    ReadOnly = False
+    FieldDefs = <>
+    AllowMultiLine = False
+    Delimiter = ','
+    FirstLineAsSchema = False
+    StripTrailingDelimiters = False
+    Left = 120
+    Top = 72
+  end
+end
