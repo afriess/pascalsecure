@@ -1,6 +1,6 @@
 unit security.manager.schema;
 
-{$mode objfpc}{$H+}
+{$mode objfpc}{$H+}{$M+}
 
 interface
 
@@ -8,6 +8,32 @@ uses
   Classes, SysUtils, fgl;
 
 type
+
+  //forward.
+  TUserWithLevelAccess = class;
+
+  IUsrLevelMgntInterface = interface
+    ['{E3103A23-FFAE-4286-8565-C41038285EEF}']
+    function AddUser(const UserLogin, UserDescription, PlainPassword:UTF8String;
+                     const UsrLevel:Integer;
+                     const Blocked:Boolean;
+                     out   UID:Integer;
+                     out   UsrObject:TUserWithLevelAccess):Boolean;
+
+    function DelUser(Const UsrObject:TUserWithLevelAccess):Boolean;
+
+    function UpdateUser(const UsrObject:TUserWithLevelAccess;
+                        const UserDescription, PlainPassword:UTF8String;
+                        const UsrLevel:Integer;
+                        const Blocked:Boolean):Boolean;
+
+    function BlockUser(const UsrObject:TUserWithLevelAccess;
+                       const Blocked:Boolean):Boolean;
+
+    function ChangeUserPass(const UsrObject:TUserWithLevelAccess;
+                            const PlainPassword:UTF8String):Boolean;
+
+  end;
 
   TUsrMgntType = (umtUnknown,
                   umtLevel,
@@ -37,11 +63,19 @@ type
   end;
 
   //: Implements a simple user, with UID, Login, Description and enable/disable option.
+
+  { TCustomUser }
+
   TCustomUser = class(TObject)
+  private
+    procedure SetUserPassword(AValue: UTF8String);
   protected
     //immutable fields.
     FUID:Integer;
     FUserLogin:UTF8String;
+
+    FUserPassword,
+    FOldUserPassword: UTF8String;
 
     FUserDescription,
     FOldUserDescription:UTF8String;
@@ -52,6 +86,8 @@ type
     procedure SetUserDescription(AValue: UTF8String); virtual;
     procedure SetBlockedUser(AValue: Boolean); virtual;
   public
+    constructor Create(aUID:Integer; aUserLogin, aUserPassword, aUserDescription:UTF8String;
+      aBlockedUser:Boolean);
     constructor Create(aUID:Integer; aUserLogin, aUserDescription:UTF8String;
       aBlockedUser:Boolean);
     function Modified:Boolean; virtual;
@@ -59,6 +95,7 @@ type
   published
     property UID:integer read FUID;
     property Login:UTF8String read FUserLogin;
+    property Password:UTF8String read FUserPassword write SetUserPassword;
     property UserDescription:UTF8String read FUserDescription write SetUserDescription;
     property UserBlocked:Boolean read FBlockedUser write SetBlockedUser;
   end;
@@ -69,14 +106,20 @@ type
   TSimpleUser = class(TCustomUser);
 
   //: Implements a user with access level.
+
+  { TUserWithLevelAccess }
+
   TUserWithLevelAccess = class(TCustomUser)
+  private
   protected
     FUserLevel,
     FOldUserLevel: Integer;
     procedure SetUserLevel(AValue: Integer);
   public
-    constructor Create(aUID:Integer; aUserLogin, aUserDescription:UTF8String;
-      aBlockedUser:Boolean; aUserLevel:Integer);
+    constructor Create(aUID: Integer; aUserLogin, aUserDescription: UTF8String;
+      aBlockedUser: Boolean; aUserLevel: Integer);
+    constructor Create(aUID: Integer; aUserLogin, aUserPassword,
+      aUserDescription: UTF8String; aBlockedUser: Boolean; aUserLevel: Integer);
     function Modified:Boolean; override;
     procedure ResetModified; override;
   published
@@ -87,14 +130,29 @@ type
   TUserLevelList = specialize TFPGMap<Integer, TUserWithLevelAccess>;
 
   //: Implements a user with user allowed authorizations
+
+  { TAuthorizedUser }
+
   TAuthorizedUser = class(TCustomUser)
+  private
+    function GetAuthorizationByID(AuthID:Integer):TAuthorization;
+    function GetAuthorization(aIndex: Integer): TAuthorization;
+    function GetAuthorizationByName(AuthorizationName: UTF8String
+      ): TAuthorization;
+    function GetAuthorizationCount: Integer;
   protected
     FUserAuthorizations:TAuthorizationList;
   public
-    constructor Create(aUID:Integer; aUserLogin, aUserDescription:UTF8String;
-      aBlockedUser:Boolean);
+    constructor Create(aUID: Integer; aUserLogin, aUserPassword,
+      aUserDescription: UTF8String; aBlockedUser: Boolean);
+    constructor Create(aUID: Integer; aUserLogin, aUserDescription: UTF8String;
+      aBlockedUser: Boolean);
     destructor Destroy; override;
     function AuthorizationList:TAuthorizationList;
+    property AuthorizationCount:Integer read GetAuthorizationCount;
+    property Authorization[Index:Integer]:TAuthorization read GetAuthorization;
+    property AuthorizationByName[AuthorizationName:UTF8String]:TAuthorization read GetAuthorizationByName;
+    property AuthorizationByID[AuthID:Integer]:TAuthorization read GetAuthorizationByID;
   end;
 
   //: Implements a list of users with specific authorizations
@@ -148,7 +206,13 @@ type
   TUsrGroupList = specialize TFPGMap<Integer, TUsersGroup>;
 
   //: Implements the entire user management schema.
-  TUsrMgntSchema = class(TObject);
+
+  { TUsrMgntSchema }
+
+  TUsrMgntSchema = class(TObject)
+  public
+    class function UsrMgntType:TUsrMgntType; virtual;
+  end;
 
   {:
   Implements a user level based schema.
@@ -161,15 +225,21 @@ type
   This schema is similar to the security system used in Elipse SCADA
   and in Wonderware Intouch.
   }
+
+  { TUsrLevelMgntSchema }
+
   TUsrLevelMgntSchema = class(TUsrMgntSchema)
   protected
     FMaxLevel: Integer;
     FMinLevel: Integer;
     FAdminLevel: Integer;
+    FUserLevelList:TUserLevelList;
   public
     constructor Create(aMinLevel, aMaxLevel, aAdminLevel:Integer);
     destructor Destroy; override;
+    class function UsrMgntType:TUsrMgntType; override;
   published
+    function UserList:TUserLevelList;
     property AdminLevel:Integer read FAdminLevel;
     property MinLevel:Integer read FMinLevel;
     property MaxLevel:Integer read FMaxLevel;
@@ -199,13 +269,26 @@ type
 
   This schema is similar to the securty system used in Siemens WinCC.
   }
+
+  { TUsrAuthSchema }
+
   TUsrAuthSchema = class(TAuthBasedUsrMgntSchema)
+  private
+    function GetUser(aIndex: Integer): TCustomUser;
+    function GetUserByName(aLogin: UTF8String): TCustomUser;
+    function GetUserByUID(aUID: Integer): TCustomUser;
+    function GetUserCount: Integer;
   protected
     FUserList:TAuthorizedUserList;
   public
     constructor Create; override;
     destructor Destroy; override;
+    class function UsrMgntType:TUsrMgntType; override;
     function UserList:TAuthorizedUserList;
+    property UserCount:Integer read GetUserCount;
+    property User[Index:Integer]:TCustomUser read GetUser;
+    property UserByUID[UID:Integer]:TCustomUser read GetUserByUID;
+    property UserByName[UserName:UTF8String]:TCustomUser read GetUserByName;
   end;
 
   {:
@@ -221,12 +304,16 @@ type
 
   This schema is similar to the securty system used in Rockwell FactoryTalk.
   }
+
+  { TUsrGroupAuthSchema }
+
   TUsrGroupAuthSchema = class(TUsrAuthSchema)
   protected
     FGroupList:TUsrGroupList;
   public
     constructor Create; override;
     destructor Destroy; override;
+    class function UsrMgntType:TUsrMgntType; override;
     function GroupList:TUsrGroupList;
   end;
 
@@ -242,6 +329,9 @@ type
      the group.
   ** A list with all authorizations available on the security manager.
   }
+
+  { TGroupAuthSchema }
+
   TGroupAuthSchema = class(TAuthBasedUsrMgntSchema)
   protected
     FUserList:TUserList;
@@ -249,15 +339,21 @@ type
   public
     constructor Create; override;
     destructor Destroy; override;
+    class function UsrMgntType:TUsrMgntType; override;
     function UserList:TUserList;
     function GroupList:TSimpleUserGroupList;
   end;
 
-
-
 implementation
 
 uses security.exceptions;
+
+{ TUsrMgntSchema }
+
+class function TUsrMgntSchema.UsrMgntType: TUsrMgntType;
+begin
+  Result:= umtUnknown;
+end;
 
 function TUsersGroup.AddUser(const aUser: TAuthorizedUser): Boolean;
 begin
@@ -283,6 +379,11 @@ begin
   inherited Destroy;
 end;
 
+class function TGroupAuthSchema.UsrMgntType: TUsrMgntType;
+begin
+  Result:= TUsrMgntType.umtAuthorizationByGroup;
+end;
+
 function TGroupAuthSchema.UserList: TUserList;
 begin
   Result:=FUserList;
@@ -305,21 +406,69 @@ begin
   inherited Destroy;
 end;
 
+class function TUsrGroupAuthSchema.UsrMgntType: TUsrMgntType;
+begin
+  Result:= TUsrMgntType.umtAuthorizationByUserAndGroup;
+end;
+
 function TUsrGroupAuthSchema.GroupList: TUsrGroupList;
 begin
   Result:=FGroupList;
+end;
+
+function TUsrAuthSchema.GetUser(aIndex: Integer): TCustomUser;
+begin
+  Result:=nil;
+  if assigned(FUserList) and (aIndex<FUserList.Count) then
+    result := FUserList.KeyData[FUserList.Keys[aIndex]];
+end;
+
+function TUsrAuthSchema.GetUserByName(aLogin: UTF8String): TCustomUser;
+var
+  i: Integer;
+  AuxResult: TAuthorizedUser;
+begin
+  Result:=nil;
+  if assigned(FUserList) then
+    for i:= 0 to FUserList.Count-1 do begin
+       AuxResult:= FUserList.Data[i];
+       if SameStr(aLogin,AuxResult.Login) then begin
+         Result:=AuxResult;
+         break;
+       end;
+    end; // for
+end;
+
+function TUsrAuthSchema.GetUserByUID(aUID: Integer): TCustomUser;
+var
+  aKeyIdx: Integer;
+begin
+  Result:=nil;
+  if assigned(FUserList) and FUserList.Find(aUID, aKeyIdx) then
+    Result := FUserList.KeyData[FUserList.Keys[aKeyIdx]];
+end;
+
+function TUsrAuthSchema.GetUserCount: Integer;
+begin
+  Result:=FUserList.Count;
 end;
 
 constructor TUsrAuthSchema.Create;
 begin
   inherited Create;
   FUserList:=TAuthorizedUserList.Create;
+  FUserList.Sorted:=true;
 end;
 
 destructor TUsrAuthSchema.Destroy;
 begin
   FreeAndNil(FUserList);
   inherited Destroy;
+end;
+
+class function TUsrAuthSchema.UsrMgntType: TUsrMgntType;
+begin
+  Result:= TUsrMgntType.umtAuthorizationByUser;
 end;
 
 function TUsrAuthSchema.UserList: TAuthorizedUserList;
@@ -349,13 +498,33 @@ constructor TUsrLevelMgntSchema.Create(aMinLevel, aMaxLevel,
 begin
   inherited Create;
   FAdminLevel:=aAdminLevel;
+  FUserLevelList:=TUserLevelList.Create;
   if aMinLevel>=aMaxLevel then
     raise EInvalidLevelRanges.Create(aMinLevel,aMaxLevel);
+  FMinLevel:=aMinLevel;
+  FMaxLevel:=aMaxLevel;
 end;
 
 destructor TUsrLevelMgntSchema.Destroy;
+var
+  i: LongInt;
 begin
+  for i:=FUserLevelList.Count-1 downto 0 do begin
+    FUserLevelList.KeyData[FUserLevelList.Keys[i]].Destroy;
+    FUserLevelList.Delete(i);
+  end;
+
   inherited Destroy;
+end;
+
+class function TUsrLevelMgntSchema.UsrMgntType: TUsrMgntType;
+begin
+  Result:= TUsrMgntType.umtLevel;
+end;
+
+function TUsrLevelMgntSchema.UserList: TUserLevelList;
+begin
+  Result:=FUserLevelList;
 end;
 
 
@@ -425,12 +594,58 @@ end;
 
 { TAuthorizedUser }
 
+function TAuthorizedUser.GetAuthorizationByID(AuthID: Integer): TAuthorization;
+var
+  aux: Integer;
+begin
+  Result:=nil;
+  if assigned(FUserAuthorizations) and FUserAuthorizations.Find(AuthID, aux) then
+    result := FUserAuthorizations.KeyData[FUserAuthorizations.Keys[aux]];
+end;
+
+function TAuthorizedUser.GetAuthorization(aIndex: Integer): TAuthorization;
+begin
+  Result:=nil;
+  if assigned(FUserAuthorizations) and (aIndex<FUserAuthorizations.Count) then
+    result := FUserAuthorizations.KeyData[FUserAuthorizations.Keys[aIndex]];
+end;
+
+function TAuthorizedUser.GetAuthorizationByName(AuthorizationName: UTF8String
+  ): TAuthorization;
+var
+  i: Integer;
+  AuxResult: TAuthorization;
+begin
+  Result:=nil;
+  if assigned(FUserAuthorizations) then
+    for i:= 0 to FUserAuthorizations.Count-1 do begin
+       AuxResult:= FUserAuthorizations.Data[i];
+       if SameStr(AuthorizationName,AuxResult.Description) then begin
+         Result:=AuxResult;
+         break;
+       end;
+    end; // for
+end;
+
+function TAuthorizedUser.GetAuthorizationCount: Integer;
+begin
+  Result:=FUserAuthorizations.Count;
+end;
+
+constructor TAuthorizedUser.Create(aUID: Integer; aUserLogin, aUserPassword,
+  aUserDescription: UTF8String; aBlockedUser: Boolean);
+begin
+  inherited Create(aUID,aUserLogin,aUserPassword,aUserDescription,aBlockedUser);
+  FUserAuthorizations:=TAuthorizationList.Create;
+  FUserAuthorizations.Sorted:=true;
+end;
+
 constructor TAuthorizedUser.Create(aUID: Integer; aUserLogin,
   aUserDescription: UTF8String; aBlockedUser: Boolean);
 begin
-  inherited Create(aUID,aUserLogin,aUserDescription,aBlockedUser);
-  FUserAuthorizations:=TAuthorizationList.Create;
+  Create(aUID,aUserLogin, '',aUserDescription,aBlockedUser);
 end;
+
 
 destructor TAuthorizedUser.Destroy;
 begin
@@ -472,7 +687,13 @@ end;
 constructor TUserWithLevelAccess.Create(aUID: Integer; aUserLogin,
   aUserDescription: UTF8String; aBlockedUser: Boolean; aUserLevel: Integer);
 begin
-  inherited Create(aUID, aUserLogin, aUserDescription, aBlockedUser);
+  Create(aUID, aUserLogin, '', aUserDescription, aBlockedUser, aUserLevel);
+end;
+
+constructor TUserWithLevelAccess.Create(aUID: Integer; aUserLogin, aUserPassword,
+  aUserDescription: UTF8String; aBlockedUser: Boolean; aUserLevel: Integer);
+begin
+  inherited Create(aUID, aUserLogin, aUserPassword, aUserDescription, aBlockedUser);
   FUserLevel:=aUserLevel;
   FOldUserLevel:=aUserLevel;
 end;
@@ -484,6 +705,7 @@ end;
 
 procedure TUserWithLevelAccess.ResetModified;
 begin
+  inherited;
   FOldUserLevel := FUserLevel;
 end;
 
@@ -496,6 +718,13 @@ begin
   FBlockedUser:=AValue;
 end;
 
+procedure TCustomUser.SetUserPassword(AValue: UTF8String);
+begin
+  if FUserPassword=AValue then Exit;
+  FOldUserPassword:= FUserPassword;
+  FUserPassword:=AValue;
+end;
+
 procedure TCustomUser.SetUserDescription(AValue: UTF8String);
 begin
   if FUserDescription=AValue then Exit;
@@ -503,7 +732,7 @@ begin
   FUserDescription:=AValue;
 end;
 
-constructor TCustomUser.Create(aUID: Integer; aUserLogin,
+constructor TCustomUser.Create(aUID: Integer; aUserLogin, aUserPassword,
   aUserDescription: UTF8String; aBlockedUser: Boolean);
 begin
   inherited Create;
@@ -513,18 +742,29 @@ begin
   FUserDescription    := aUserDescription;
   FOldUserDescription := aUserDescription;
 
+  FUserPassword   := aUserPassword;
+  FOldUserPassword:= aUserPassword;
+
   FBlockedUser  := aBlockedUser;
   FOldUserState := aBlockedUser;
 end;
 
+constructor TCustomUser.Create(aUID: Integer; aUserLogin,
+  aUserDescription: UTF8String; aBlockedUser: Boolean);
+begin
+  Create(aUID, aUserLogin, '', aUserDescription, aBlockedUser);
+end;
+
 function TCustomUser.Modified: Boolean;
 begin
-  Result := (FUserDescription<>FOldUserDescription) or (FBlockedUser<>FOldUserState);
+  Result := (FUserDescription<>FOldUserDescription) or (FBlockedUser<>FOldUserState)
+            or (FUserPassword <> FOldUserPassword);
 end;
 
 procedure TCustomUser.ResetModified;
 begin
   FOldUserDescription:=FUserDescription;
+  FOldUserPassword:= FUserPassword;
   FOldUserState:=FBlockedUser;
 end;
 

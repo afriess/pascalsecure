@@ -10,109 +10,163 @@ uses
   Controls,
   ExtCtrls,
   Forms,
-  StdCtrls,
-  sysutils,
-  security.manager.basic_user_management,
-  security.manager.controls_manager;
+  StdCtrls, ComCtrls,
+  sysutils, math, strutils,
+  security.manager.schema,
+  security.manager.custom_usrmgnt_interface,
+  security.manager.basic_user_management;
 
 type
 
-  TFocusedControl = (fcUserName, fcPassword);
+  TSecureFocusedControl = (fcUserName, fcPassword);
 
   { TCustomFrmLogin }
 
-  TCustomFrmLogin = Class(TCustomForm)
+  TSecureCustomFrmLogin = Class(TCustomForm)
   private
-    FFocusedControl: TFocusedControl;
+    FFocusedControl: TSecureFocusedControl;
+    FOnCancelClick: TNotifyEvent;
+    FOnOKClick: TNotifyEvent;
     function GetUserLogin: String; virtual; abstract;
     function GetUserPassword: String; virtual; abstract;
+    procedure SetFocusedControl(AValue: TSecureFocusedControl); virtual; abstract;
     procedure SetUserLogin(AValue: String); virtual; abstract;
     procedure SetUserPassword(AValue: String); virtual; abstract;
   public
     procedure DisableEntry; virtual; abstract;
     procedure EnableEntry; virtual; abstract;
-    property FocusedControl:TFocusedControl read FFocusedControl write FFocusedControl;
+    property FocusedControl:TSecureFocusedControl read FFocusedControl write SetFocusedControl;
     property UserLogin:String read GetUserLogin write SetUserLogin;
     property UserPassword:String read GetUserPassword write SetUserPassword;
+    property OnOKClick:TNotifyEvent read FOnOKClick write FOnOKClick;
+    property OnCancelClick:TNotifyEvent read FOnCancelClick write FOnCancelClick;
   end;
+
+  TSecureCustomFrmLoginClass = class of TSecureCustomFrmLogin;
 
   { TFrmLogin }
 
-  TFrmLogin = Class(TCustomFrmLogin)
+  TSecureFrmLogin = Class(TSecureCustomFrmLogin)
   private
     lblLogin,
     lblPassword:TLabel;
     edtLogin,
     edtPassword:TEdit;
     btnButtons:TButtonPanel;
+    procedure CancelClicked(Sender: TObject);
     function GetUserLogin: String; override;
     function GetUserPassword: String; override;
+    procedure OKClicked(Sender: TObject);
     procedure SetUserLogin(AValue: String); override;
     procedure SetUserPassword(AValue: String); override;
-  protected
+    procedure SetFocusedControl(AValue: TSecureFocusedControl); override;
     procedure DoShow; override;
   public
     constructor CreateNew(AOwner: TComponent; Num: Integer=0); override;
     procedure DisableEntry; override;
     procedure EnableEntry; override;
-    property FocusedControl:TFocusedControl read FFocusedControl write FFocusedControl;
+    property FocusedControl:TSecureFocusedControl read FFocusedControl write FFocusedControl;
     property UserLogin:String read GetUserLogin write SetUserLogin;
     property UserPassword:String read GetUserPassword write SetUserPassword;
   end;
 
+  { TGraphicalUsrMgntInterface }
 
-
-  { TBasicGraphicalUserManagement }
-
-  TBasicGraphicalUserManagement = class(TBasicUserManagement)
+  TGraphicalUsrMgntInterface = class(TCustomUsrMgntInterface)
   private
-    procedure UnfreezeLogin(Sender: TObject);
+    procedure LevelAddUserClick(Sender: TObject);
+    procedure LevelBlockUserClick(Sender: TObject;
+      const aUser: TUserWithLevelAccess);
+    procedure LevelChangeUserClick(Sender: TObject;
+      const aUser: TUserWithLevelAccess);
+    procedure LevelChangeUserPassClick(Sender: TObject;
+      const aUser: TUserWithLevelAccess);
   protected
-    frmLogin:TCustomFrmLogin;
+    frmLogin:TSecureCustomFrmLogin;
+    FCanCloseLogin:Boolean;
+    FCurrentUserSchema:TUsrMgntSchema;
+    procedure CanCloseLogin(Sender: TObject; var CanClose: boolean);
+    procedure CancelClick(Sender: TObject);
+    procedure OKClick(Sender: TObject);
+    function  GetLoginClass:TSecureCustomFrmLoginClass; virtual;
   public
-    function Login: Boolean; override; overload;
-    function CheckIfUserIsAllowed(sc: String; RequireUserLogin: Boolean;
-      var userlogin: String): Boolean; override;
+    function  Login(out aLogin, aPass:UTF8String):Boolean; override;
+    function  Login:Boolean; override;
+    function  CanLogout:Boolean; override;
+    procedure UserManagement(aSchema:TUsrMgntSchema); override;
+    procedure FreezeUserLogin; override;
+    procedure UnfreezeUserLogin; override;
+    procedure ProcessMessages; override;
+    function  LoginVisibleBetweenRetries:Boolean; override;
   end;
 
 ResourceString
+  strFrmLoginCaption   = 'PascalSecure Login';
   strUserLogin         = '&Login';
   strUserPass          = '&Password';
   SSpecialLoginCaption = 'Enter a user that can access the "%s" token.';
+  strYes               = 'Yes';
+  strNo                = 'No';
 
 implementation
 
+uses security.manager.controls_manager,
+     security.exceptions,
+     security.manager.level.mgntdlg,
+     security.manager.level.addusrdlg, Dialogs;
+
 { TFrmLogin }
 
-function TFrmLogin.GetUserLogin: String;
+function TSecureFrmLogin.GetUserLogin: String;
 begin
   Result:=edtLogin.Text;
 end;
 
-function TFrmLogin.GetUserPassword: String;
+procedure TSecureFrmLogin.CancelClicked(Sender: TObject);
+begin
+  if Assigned(FOnCancelClick) then
+    FOnCancelClick(Sender)
+end;
+
+function TSecureFrmLogin.GetUserPassword: String;
 begin
   Result:=edtPassword.Text;
 end;
 
-procedure TFrmLogin.SetUserLogin(AValue: String);
+procedure TSecureFrmLogin.OKClicked(Sender: TObject);
+begin
+  if Assigned(FOnOKClick) then
+    FOnOKClick(Sender);
+end;
+
+procedure TSecureFrmLogin.SetUserLogin(AValue: String);
 begin
   edtLogin.Text:=AValue;
 end;
 
-procedure TFrmLogin.SetUserPassword(AValue: String);
+procedure TSecureFrmLogin.SetUserPassword(AValue: String);
 begin
   edtPassword.Text:=AValue;
 end;
 
-procedure TFrmLogin.DoShow;
+procedure TSecureFrmLogin.SetFocusedControl(AValue: TSecureFocusedControl);
 begin
-  case FFocusedControl of
-    fcUserName: if edtLogin.Enabled then edtLogin.SetFocus;
-    fcPassword: if edtPassword.Enabled then edtPassword.SetFocus;
-  end;
+  if CanFocus then
+    case AValue of
+      fcUserName: if edtLogin.Enabled and edtLogin.CanFocus then edtLogin.SetFocus;
+      fcPassword: if edtPassword.Enabled and  edtPassword.CanFocus then edtPassword.SetFocus;
+    end;
+
+  FFocusedControl:=AValue;
 end;
 
-constructor TFrmLogin.CreateNew(AOwner: TComponent; Num: Integer);
+procedure TSecureFrmLogin.DoShow;
+begin
+  inherited DoShow;
+  SetFocusedControl(FFocusedControl);
+end;
+
+constructor TSecureFrmLogin.CreateNew(AOwner: TComponent; Num: Integer);
 begin
   inherited CreateNew(AOwner,Num);
   BorderStyle:=bsDialog;
@@ -126,8 +180,8 @@ begin
   lblLogin.Parent:=Self;
 
   edtLogin:=TEdit.Create(Self);
-  edtLogin.Text:='';
   edtLogin.Name:='PASCALSECURITY_FRMLOGIN_edtLogin';
+  edtLogin.Text:='';
   edtLogin.SetBounds(8,24, 290, 86);
   edtLogin.Parent:=Self;
 
@@ -139,20 +193,22 @@ begin
   lblPassword.Parent:=Self;
 
   edtPassword:=TEdit.Create(Self);
-  edtPassword.Text:='';
   edtPassword.Name:='PASCALSECURITY_FRMLOGIN_edtPassword';
   edtPassword.PasswordChar:='*';
   edtPassword.SetBounds(8,72, 290, 86);
+  edtPassword.Text:='';
   edtPassword.Parent:=Self;
 
   lblPassword.FocusControl:=edtPassword;
 
   btnButtons:=TButtonPanel.Create(Self);
   btnButtons.ShowButtons:=[pbOK, pbCancel];
+  btnButtons.OKButton.OnClick:=@OKClicked;
+  btnButtons.CancelButton.OnClick:=@CancelClicked;
   btnButtons.Parent:=Self;
 end;
 
-procedure TFrmLogin.EnableEntry;
+procedure TSecureFrmLogin.EnableEntry;
 begin
   edtPassword.Enabled:=true;
   edtLogin.Enabled:=true;
@@ -160,32 +216,86 @@ begin
   DoShow;
 end;
 
-procedure TFrmLogin.DisableEntry;
+procedure TSecureFrmLogin.DisableEntry;
 begin
   edtPassword.Enabled:=false;
   edtLogin.Enabled:=false;
   btnButtons.Enabled:=false;
 end;
 
-{ TBasicGraphicalUserManagement }
+{ TGraphicalUsrMgntInterface }
 
-procedure TBasicGraphicalUserManagement.UnfreezeLogin(Sender: TObject);
+procedure TGraphicalUsrMgntInterface.OKClick(Sender: TObject);
+var
+  aUID:Integer;
 begin
-  if sender is TTimer then begin
-    TTimer(sender).Enabled:=false;
-    if Assigned(frmLogin) then begin
-      frmLogin.Close;
-      frmLogin.EnableEntry;
-    end;
+  FCanCloseLogin:=false;
+  if not Assigned(frmLogin) then exit;
+  FCanCloseLogin:=GetControlSecurityManager.Login(frmLogin.GetUserLogin,frmLogin.GetUserPassword, aUID);
+  if not FCanCloseLogin then begin
+    frmLogin.SetUserPassword('');
+    frmLogin.FocusedControl:=fcPassword;
+    frmLogin.DoShow;
   end;
 end;
 
-function TBasicGraphicalUserManagement.Login: Boolean;
+function TGraphicalUsrMgntInterface.GetLoginClass: TSecureCustomFrmLoginClass;
+begin
+  Result:=TSecureFrmLogin;
+end;
+
+procedure TGraphicalUsrMgntInterface.LevelAddUserClick(Sender: TObject);
+begin
+
+end;
+
+procedure TGraphicalUsrMgntInterface.LevelBlockUserClick(Sender: TObject;
+  const aUser: TUserWithLevelAccess);
+begin
+
+end;
+
+procedure TGraphicalUsrMgntInterface.LevelChangeUserClick(Sender: TObject;
+  const aUser: TUserWithLevelAccess);
+begin
+
+end;
+
+procedure TGraphicalUsrMgntInterface.LevelChangeUserPassClick(Sender: TObject;
+  const aUser: TUserWithLevelAccess);
+begin
+
+end;
+
+procedure TGraphicalUsrMgntInterface.CanCloseLogin(Sender: TObject;
+  var CanClose: boolean);
+begin
+  CanClose:=FCanCloseLogin;
+end;
+
+procedure TGraphicalUsrMgntInterface.CancelClick(Sender: TObject);
+begin
+  FCanCloseLogin:=true;
+end;
+
+function TGraphicalUsrMgntInterface.Login(out aLogin, aPass: UTF8String
+  ): Boolean;
 var
-  frozenTimer:TTimer;
-  retries:LongInt;
-  aborted, loggedin:Boolean;
-  aUserID: Integer;
+  afrmLogin: TSecureCustomFrmLogin;
+begin
+  afrmLogin:=GetLoginClass.CreateNew(Application);
+  try
+    Result:=afrmLogin.ShowModal=mrOK;
+    if Result then begin
+      aLogin:=frmLogin.UserLogin;
+      aPass :=frmLogin.UserPassword;
+    end;
+  finally
+    FreeAndNil(afrmLogin);
+  end;
+end;
+
+function TGraphicalUsrMgntInterface.Login: Boolean;
 begin
   if Assigned(frmLogin) then begin
     Result:=false;
@@ -193,103 +303,126 @@ begin
     exit;
   end;
 
-  frozenTimer:=TTimer.Create(nil);
-  frozenTimer.Enabled:=false;
-  frozenTimer.Interval:=LoginFrozenTime;
-  frozenTimer.Tag:=1; //login
-  frozenTimer.OnTimer:=@UnfreezeLogin;
-  frmLogin:=TFrmLogin.CreateNew(nil);
-  retries:=0;
-  aborted:=false;
-  loggedin:=False;
-  Result:=false;
+  FCanCloseLogin:=false;
+
+  frmLogin:=GetLoginClass.CreateNew(nil);
   try
+    frmLogin.Caption:=strFrmLoginCaption;
+    frmLogin.OnCloseQuery:=@CanCloseLogin;
+    frmLogin.OnOKClick:=@OKClick;
+    frmLogin.OnCancelClick:=@CancelClick;
     frmLogin.UserLogin:='';
     frmLogin.FocusedControl:=fcUserName;
-    while (not loggedin) and (not aborted) do begin
-      frmLogin.SetUserPassword('');
-      if frmLogin.ShowModal=mrOk then begin
-        if CheckUserAndPassword(frmLogin.UserLogin, frmLogin.UserPassword, {%H-}aUserID, true) then begin
-          FLoggedUser:=true;
-          FUID:=aUserID;
-          loggedin:=true;
-          FCurrentUserLogin:=frmLogin.UserLogin;
-          FLoggedSince:=Now;
-          Result:=true;
-          GetControlSecurityManager.UpdateControls;
-          DoSuccessfulLogin;
-        end else begin
-          DoFailureLogin;
-          inc(retries);
-          if (FLoginRetries>0) and (retries>=FLoginRetries) then begin
-            frmLogin.DisableEntry;
-            frozenTimer.Enabled:=true;
-            frmLogin.ShowModal;
-            retries:=0;
+    Result:=frmLogin.ShowModal=mrOK;
+  finally
+    FreeAndNil(frmLogin);
+  end;
+end;
+
+function TGraphicalUsrMgntInterface.CanLogout: Boolean;
+begin
+  Result:=true;
+end;
+
+procedure TGraphicalUsrMgntInterface.UserManagement(aSchema: TUsrMgntSchema);
+var
+  lvlfrm:TsecureUsrLvlMgnt;
+  lvlSchema: TUsrLevelMgntSchema;
+  i: Integer;
+  usr: TUserWithLevelAccess;
+  item: TListItem;
+  lvlLength: Integer;
+
+  function RepeatString(aStr:String; count:Integer):String;
+  var
+    c: Integer;
+  begin
+    Result:='';
+    for c:=1 to count do
+      Result:=Result+aStr;
+  end;
+
+begin
+  //allows one user management...
+  if (not Assigned(FCurrentUserSchema)) and Assigned(aSchema) then begin
+    FCurrentUserSchema:=aSchema;
+    try
+      if aSchema is TUsrLevelMgntSchema then begin
+        lvlSchema:=TUsrLevelMgntSchema(aSchema);
+        lvlfrm:=TsecureUsrLvlMgnt.Create(Self);
+        lvlfrm.OnAddUserClick:=@LevelAddUserClick;
+        lvlfrm.OnBlockUserClick:=@LevelBlockUserClick;
+        lvlfrm.OnChangeUserClick:=@LevelChangeUserClick;
+        lvlfrm.OnChangeUsrPassClick:=@LevelChangeUserPassClick;
+        try
+
+          lvlLength := Max(Length(IntToStr(lvlSchema.MinLevel)), Length(IntToStr(lvlSchema.MaxLevel)));
+
+          for i:=0 to lvlSchema.UserList.Count-1 do begin
+            usr:=lvlSchema.UserList.KeyData[lvlSchema.UserList.Keys[i]];
+            item:=lvlfrm.ListView1.Items.add;
+            item.Caption:=usr.Login;
+            item.SubItems.Add(usr.UserDescription);
+            item.SubItems.Add(RightStr(RepeatString('0',lvlLength)+inttostr(usr.UserLevel),lvlLength));
+            item.SubItems.Add(ifthen(usr.UserBlocked, strYes, strNo));
+            item.Data:=usr;
           end;
+          lvlfrm.ShowModal;
+        finally
+          FreeAndNil(lvlfrm);
         end;
-      end else
-        aborted:=true;
-      frmLogin.FocusedControl:=fcPassword;
+        exit;
+      end;
+
+      if aSchema is TUsrAuthSchema then begin
+
+        exit;
+      end;
+
+      if aSchema is TUsrGroupAuthSchema then begin
+
+        exit;
+      end;
+
+      if aSchema is TGroupAuthSchema then begin
+
+        exit;
+      end;
+
+      //unknown schema class...
+      raise EUnknownUserMgntSchema.Create;
+    finally
+      FCurrentUserSchema:=nil;
     end;
-  finally
-    FreeAndNil(frmLogin);
-    FreeAndNil(frozenTimer);
+  end else begin
+    if not Assigned(aSchema) then
+      raise ENilUserSchema.Create;
+
+    //TODO: Second user management session exception...
   end;
+
 end;
 
-function TBasicGraphicalUserManagement.CheckIfUserIsAllowed(sc: String;
-  RequireUserLogin: Boolean; var userlogin: String): Boolean;
-var
-  frozenTimer:TTimer;
-  aUserID:Integer;
-
+procedure TGraphicalUsrMgntInterface.FreezeUserLogin;
 begin
-  Result:=false;
+  if Assigned(frmLogin) then frmLogin.DisableEntry;
+end;
 
-  //se o usuário logado tem permissão, evita
-  //abrir o dialog que irá solicitar a permissão
-  //de outro usuário.
-  if UserLogged and CanAccess(sc) and (RequireUserLogin=false) then begin
-    userlogin:=GetCurrentUserLogin;
-    Result:=true;
-    exit;
-  end;
+procedure TGraphicalUsrMgntInterface.UnfreezeUserLogin;
+begin
+  if Assigned(frmLogin) then frmLogin.EnableEntry;
+end;
 
-  //se existe um dialogo de permissão especial aberto
-  //chama ele...
-  if Assigned(frmLogin) then begin
-    Result:=false;
-    frmLogin.ShowOnTop;
-    exit;
-  end;
+procedure TGraphicalUsrMgntInterface.ProcessMessages;
+begin
+  Application.ProcessMessages;
+  CheckSynchronize(1);
+  Sleep(1);
+end;
 
-  frozenTimer:=TTimer.Create(nil);
-  frozenTimer.Enabled:=false;
-  frozenTimer.Interval:=LoginFrozenTime;
-  frozenTimer.Tag:=2; //Check
-  frozenTimer.OnTimer:=@UnfreezeLogin;
-  frmLogin:=TFrmLogin.CreateNew(nil);
-
-  frmLogin.Caption:=Format(SSpecialLoginCaption, [sc]);
-  Result:=false;
-  try
-    frmLogin.FocusedControl:=fcUserName;
-    frmLogin.UserLogin:='';
-    frmLogin.UserPassword:='';
-    if frmLogin.ShowModal=mrOk then begin
-      if CheckUserAndPassword(frmLogin.UserLogin, frmLogin.UserPassword, {%H-}aUserID, false) then begin
-        if CanAccess(sc,aUserID) then begin
-          Result:=true;
-          userlogin:=frmLogin.UserLogin;
-        end else
-          Result:=false;
-      end;
-    end;
-  finally
-    FreeAndNil(frmLogin);
-    FreeAndNil(frozenTimer);
-  end;
+function TGraphicalUsrMgntInterface.LoginVisibleBetweenRetries: Boolean;
+begin
+  Result:=true;
 end;
 
 end.

@@ -4,7 +4,6 @@
 
 unit pascalsecure;
 
-{$warn 5023 off : no warning about unused units}
 interface
 
 uses
@@ -17,7 +16,6 @@ implementation
 
 procedure Register;
 begin
-  RegisterUnit('pascalsecure_reg', @pascalsecure_reg.Register);
 end;
 
 initialization

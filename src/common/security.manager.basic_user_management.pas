@@ -55,6 +55,9 @@ type
     function CanAccess(sc:String; aUID:Integer):Boolean; virtual; abstract; overload;
     procedure SetUsrMgntInterface(AValue: TCustomUsrMgntInterface);
 
+    procedure Notification(AComponent: TComponent; Operation: TOperation);
+      override;
+
     //read only properties.
     property LoggedSince:TDateTime read GetLoginTime;
 
@@ -188,12 +191,18 @@ begin
 end;
 
 procedure TBasicUserManagement.Manage;
+var
+  schema: TUsrMgntSchema;
 begin
-  //Result:=false;
-  //if Assigned(FUsrMgntInterface) then
-  //  Result:=FUsrMgntInterface.UserManagement(GetUserSchema);
-  //else
-  //  raise EUnassignedUsrMgntIntf.Create;
+  if Assigned(FUsrMgntInterface) then begin
+    schema:=GetUserSchema;
+    try
+      FUsrMgntInterface.UserManagement(schema)
+    finally
+      FreeAndNil(schema);
+    end;
+  end else
+    raise EUnassignedUsrMgntIntf.Create;
 end;
 
 function TBasicUserManagement.UsrMgntType: TUsrMgntType;
@@ -266,8 +275,19 @@ end;
 procedure TBasicUserManagement.SetUsrMgntInterface(
   AValue: TCustomUsrMgntInterface);
 begin
+
   if FUsrMgntInterface=AValue then Exit;
+  if Assigned(FUsrMgntInterface) Then FUsrMgntInterface.RemoveFreeNotification(Self);
+  if Assigned(AValue) then AValue.FreeNotification(Self);
   FUsrMgntInterface:=AValue;
+end;
+
+procedure TBasicUserManagement.Notification(AComponent: TComponent;
+  Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if (Operation=opRemove) and (AComponent=FUsrMgntInterface) then
+    FUsrMgntInterface:=nil;
 end;
 
 function    TBasicUserManagement.GetLoginTime:TDateTime;
