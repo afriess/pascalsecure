@@ -8,7 +8,8 @@ uses
   LCLVersion,
   Classes,
   ComCtrls,
-  security.manager.controls_manager;
+  security.manager.controls_manager,
+  security.manager.SecureControlInterface;
 
 type
 

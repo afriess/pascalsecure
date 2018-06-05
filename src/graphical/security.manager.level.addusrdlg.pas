@@ -5,10 +5,12 @@ unit security.manager.level.addusrdlg;
 interface
 
 uses
-  security.manager.addusrdlg, StdCtrls, ButtonPanel;
+  security.manager.addusrdlg, StdCtrls, ButtonPanel, Spin, Classes;
 
 type
   TsecureLevelAddUser = class(TsecureAddUser)
+    Label5: TLabel;
+    secureUserLevel: TSpinEdit;
   private
 
   public

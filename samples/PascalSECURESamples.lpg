@@ -1,22 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectGroup FileVersion="1">
-    <Targets Count="3">
+    <Targets Count="5">
       <Target0 FileName="LoginBase\Login03.lpi">
         <BuildModes Count="2"/>
         <Mode1 Name="Debug"/>
         <Mode2 Name="Release"/>
       </Target0>
-      <Target1 FileName="LoginAuthBased\LoginAuthBased.lpi">
+      <Target1 FileName="LoginLvlBased\LoginLvlBased.lpi">
         <BuildModes Count="2"/>
         <Mode1 Name="Debug" Compile="True"/>
         <Mode2 Name="Release"/>
       </Target1>
-      <Target2 FileName="LoginAuthBasedDB\LoginAuthBasedDB.lpi">
+      <Target2 FileName="LoginAuthBased\LoginAuthBased.lpi">
         <BuildModes Count="2"/>
         <Mode1 Name="Debug" Compile="True"/>
         <Mode2 Name="Release"/>
       </Target2>
+      <Target3 FileName="LoginAuthBasedDB\LoginAuthBasedDB.lpi">
+        <BuildModes Count="2"/>
+        <Mode1 Name="Debug" Compile="True"/>
+        <Mode2 Name="Release"/>
+      </Target3>
+      <Target4 FileName="..\src\tests\GUITest_Common.lpi">
+        <BuildModes Count="1"/>
+        <Mode1 Name="Default"/>
+      </Target4>
     </Targets>
   </ProjectGroup>
 </CONFIG>

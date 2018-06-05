@@ -9,7 +9,8 @@ uses
   Controls,
   DbCtrls,
   Graphics,
-  security.manager.controls_manager;
+  security.manager.controls_manager,
+  security.manager.SecureControlInterface;
 
 type
 

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ActnList, security.actions.login, security.controls.SecureButton,
+  ActnList, Spin, security.actions.login, security.controls.SecureButton,
   security.manager.graphical_user_management, security.actions.manage,
   security.manager.custom_user_management, security.manager.schema;
 
@@ -25,7 +25,6 @@ type
     LoginAction1: TLoginAction;
     ManageUsersAndGroupsAction1: TManageUsersAndGroupsAction;
     Memo1: TMemo;
-    CustomizedUserManagement1: TUserCustomizedUserManagement;
     SecureButton1: TSecureButton;
     SecureButton2: TSecureButton;
     UserCustomizedUserManagement1: TUserCustomizedUserManagement;
@@ -45,9 +44,18 @@ type
       var SchemaType: TUsrMgntType);
     procedure UserCustomizedUserManagement1GetUserSchema(
       var Schema: TUsrMgntSchema);
+    procedure UserCustomizedUserManagement1LevelAddUser(const UserLogin,
+      UserDescription, PlainPassword: UTF8String; const aUsrLevel: Integer;
+      const aBlocked: Boolean; out aUID: Integer; out Result: Boolean);
+    procedure UserCustomizedUserManagement1LevelBlockUser(
+      var aUsrObject: TUserWithLevelAccess; const aBlocked: Boolean; out
+      Result: Boolean);
+    procedure UserCustomizedUserManagement1LevelDelUser(
+      const aUsrObject: TUserWithLevelAccess; out Result: Boolean);
     procedure UserCustomizedUserManagement1Logout(Sender: TObject);
   private
     LastValidUser:String;
+    NextUID:Integer;
   public
 
   end;
@@ -58,7 +66,7 @@ var
 implementation
 
 uses
-  security.manager.controls_manager;
+  security.manager.controls_manager, strutils;
 
 {$R *.lfm}
 
@@ -106,13 +114,46 @@ end;
 
 procedure TForm1.UserCustomizedUserManagement1GetUserSchema(
   var Schema: TUsrMgntSchema);
+var
+  aLvlMgntIntf:IUsrLevelMgntInterface;
 begin
-  Schema:=TUsrLevelMgntSchema.Create(1, 100, 1);
-  with Schema as TUsrLevelMgntSchema do begin
-    UserList.Add(0,TUserWithLevelAccess.Create(0,'root','Main administrator',false, 1));
-    UserList.Add(1,TUserWithLevelAccess.Create(1,'andi','A user',            false, 1));
-    UserList.Add(2,TUserWithLevelAccess.Create(2,'user','Another user',      false, 10));
+  if Supports(UserCustomizedUserManagement1, IUsrLevelMgntInterface, aLvlMgntIntf) then begin
+    Schema:=TUsrLevelMgntSchema.Create(1, 100, 1, aLvlMgntIntf);
+    with Schema as TUsrLevelMgntSchema do begin
+      UserList.Add(0,TUserWithLevelAccess.Create(0,'root','Main administrator',false, 1));
+      UserList.Add(1,TUserWithLevelAccess.Create(1,'andi','A user',            false, 1));
+      UserList.Add(2,TUserWithLevelAccess.Create(2,'user','Another user',      true,  10));
+    end;
   end;
+end;
+
+procedure TForm1.UserCustomizedUserManagement1LevelAddUser(const UserLogin,
+  UserDescription, PlainPassword: UTF8String; const aUsrLevel: Integer;
+  const aBlocked: Boolean; out aUID: Integer; out Result: Boolean);
+begin
+  Memo1.Append('UserCustomizedUserManagement1LevelAddUser');
+  aUID:=NextUID;
+  Inc(NextUID);
+  Result:=true;
+  ShowMessage('User Application event binding: Add the new user in your database, file or something else...');
+end;
+
+procedure TForm1.UserCustomizedUserManagement1LevelBlockUser(
+  var aUsrObject: TUserWithLevelAccess; const aBlocked: Boolean; out
+  Result: Boolean);
+begin
+  ShowMessage(format('User Application event binding: The user "%s" will be %s',[aUsrObject.Login, IfThen(aBlocked,'blocked/disabled','unblocked/enabled')]));
+  aUsrObject.UserBlocked:=aBlocked;
+  //update the enabled/disabled user in your database,file or anything else here
+  Result:=true;
+end;
+
+procedure TForm1.UserCustomizedUserManagement1LevelDelUser(
+  const aUsrObject: TUserWithLevelAccess; out Result: Boolean);
+begin
+  ShowMessage(format('User Application event binding: The user "%s" was deleted!',[aUsrObject.Login]));
+  Result:=true; //confirm all delete commands...
+  //delete the user in your database,file or anything else here
 end;
 
 procedure TForm1.UserCustomizedUserManagement1Logout(Sender: TObject);
@@ -160,6 +201,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
   Memo1.Clear;
   Memo1.Append('Create');
+  NextUID:=1000;
 end;
 
 end.

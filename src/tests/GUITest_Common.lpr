@@ -3,7 +3,8 @@ program GUITest_Common;
 {$mode objfpc}{$H+}
 
 uses
-  Interfaces, Forms, GuiTestRunner, TestSecurityManagerSchema, pascalsecure;
+  Interfaces, Forms, GuiTestRunner, TestSecurityManagerSchema, pascalsecure,
+  TestBasicUserManagement, TestControlsManager, MockSecureControl;
 
 {$R *.res}
 

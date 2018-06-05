@@ -23,6 +23,8 @@ resourcestring
   SUnassignedUserSchema                 =  'Unassigned user schema (user schema object=nil)!';
   SUnknownUserMgntSchema                =  'Unknown user management schema class!';
 
+  SInvalidUserMgntSchema                = 'Invalid user management!';
+
 implementation
 
 end.

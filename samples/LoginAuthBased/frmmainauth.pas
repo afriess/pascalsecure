@@ -47,8 +47,8 @@ type
       );
   private
     LastValidUser:String;
-    MySchemaTyp: TUsrMgntType;
-    MySchema: TUsrMgntSchema;
+    //MySchemaTyp: TUsrMgntType;
+    //MySchema: TUsrMgntSchema;
   public
 
   end;
@@ -70,13 +70,15 @@ procedure TFormAuthBased.CustomizedUserManagement1CheckUserAndPass(user,
   pass: String; var aUID: Integer; var ValidUser: Boolean; LoginAction: Boolean);
 var
   aUser: TCustomUser;
+
 begin
   //check the user login and password
   Memo1.Append('CustomizedUserManagement1CheckUserAndPass'+' ' + user + ' '+pass);
   ValidUser:= False;
   LastValidUser:= '';
-  if MySchema is TUsrAuthSchema then begin
-     aUser := TUsrAuthSchema(MySchema).UserByName[user];
+  { TODO -oAndi : This should be easier to handle}
+  if TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrAuthSchema then begin
+     aUser := TUsrAuthSchema(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[user];
      if aUser <> nil then
         ValidUser:= SameStr(aUser.Password,pass);
   end;
@@ -94,8 +96,8 @@ end;
 
 procedure TFormAuthBased.FormDestroy(Sender: TObject);
 begin
-  if Assigned(MySchema) then
-    FreeAndNil(MySchema);
+  //if Assigned(MySchema) then
+  //  FreeAndNil(MySchema);
 end;
 
 procedure TFormAuthBased.SecureButton1Click(Sender: TObject);
@@ -107,7 +109,6 @@ procedure TFormAuthBased.UserCustomizedUserManagement1GetSchemaType(
   var SchemaType: TUsrMgntType);
 begin
   Memo1.Append('UserCustomizedUserManagement1GetSchemaType');
-  SchemaType:= MySchemaTyp;
 end;
 
 procedure TFormAuthBased.UserCustomizedUserManagement1GetUserName(
@@ -121,7 +122,7 @@ procedure TFormAuthBased.UserCustomizedUserManagement1GetUserSchema(
 begin
   // Only used if OnManageUsersANdGroups not set !!
   Memo1.Append('UserCustomizedUserManagement1GetUserSchema');
-  Schema:= MySchema;
+  //Schema:= MySchema;
 end;
 
 procedure TFormAuthBased.UserCustomizedUserManagement1Logout(Sender: TObject);
@@ -134,7 +135,7 @@ procedure TFormAuthBased.UserCustomizedUserManagement1ManageUsersAndGroups(
   Sender: TObject);
 begin
   Memo1.Append('UserCustomizedUserManagement1ManageUsersAndGroups');
-  GraphicalUsrMgntInterface1.UserManagement(MySchema);
+  GraphicalUsrMgntInterface1.UserManagement(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt);
 end;
 
 procedure TFormAuthBased.CustomizedUserManagement1CanAccess(securityCode: String;
@@ -143,9 +144,10 @@ var
   aUser: TAuthorizedUser;
 begin
   CanAccess:= False;
+  { TODO -oAndi : This should be easier to handle}
   //check if the current user can access the securityCode
-  if MySchema is TUsrAuthSchema then begin
-     aUser := TAuthorizedUser(TUsrAuthSchema(MySchema).UserByName[LastValidUser]);
+  if TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt is TUsrAuthSchema then begin
+     aUser := TAuthorizedUser(TUsrAuthSchema(TUserCustomizedUserManagement(GetControlSecurityManager.UserManagement).UserMgnt).UserByName[LastValidUser]);
      if aUser <> nil then
        CanAccess:= (aUser.AuthorizationByName[securityCode] <> nil);
   end;
@@ -160,11 +162,9 @@ end;
 
 procedure TFormAuthBased.FormCreate(Sender: TObject);
 begin
-  MySchema:= nil;
   Memo1.Clear;
   Memo1.Append('Create and build Schema');
-  //BuildSchemaUser(MySchemaTyp, MySchema);
-  BuildSchemaUser(MySchemaTyp, MySchema);
+  BuildSchemaUser;
   Memo1.Append('-------------------------');
   Memo1.Append('Login as Username/Password');
   Memo1.Append('   root     1');
