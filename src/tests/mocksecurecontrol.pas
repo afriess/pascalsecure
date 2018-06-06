@@ -18,22 +18,22 @@ interface
 
 uses
   Classes, SysUtils, Controls,
-  PSECInterfaces,
-  PSECcontrolsManager;
+  security.manager.controls_manager,
+  security.manager.SecureControlInterface;
 
 type
 
   { TMockSecureControl }
 
-  TMockSecureControl = class(TControl, IPSECControlInterface)
+  TMockSecureControl = class(TControl, ISecureControlInterface)
   { ***** FOR TESTING ONLY START ***** }
   public
     // Has the Object a mocked or normal ControlManager
     FTST_IsMockControlManager: Boolean;
     // If TSTControlManager is nil, normal operation is used
-    class var TSTControlManager: TPSECControlManager;
+    class var TSTControlManager: TControlSecurityManager;
     // Set befor Create the Object !! To use the Mock, nil if normal operation
-    Class procedure TSTSetControlManager(ControlManager: TPSECControlManager);
+    Class procedure TSTSetControlManager(ControlManager: TControlSecurityManager);
     // Check the inherited Enabled Flag
     function TSTIsEnabledInherited:Boolean;
   { ***** FOR TESTING ONLY END ***** }
@@ -62,7 +62,7 @@ implementation
 
 { ***** FOR TESTING ONLY START ***** }
 class procedure TMockSecureControl.TSTSetControlManager(
-  ControlManager: TPSECControlManager);
+  ControlManager: TControlSecurityManager);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   TSTControlManager:= ControlManager; // TESTING ONLY
@@ -87,13 +87,13 @@ begin
   if TSTControlManager = nil then begin
     // Normal Operation
    {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ':use normal Manager' +{$I %LINE%});{$endif}
-   GetPSECControlManager.RegisterControl(Self as IPSECControlInterface);
+   GetControlSecurityManager.RegisterControl(Self as ISecureControlInterface);
    FTST_IsMockControlManager:= False; // No Mock
   end
   else begin
     // Work with injected Manager
     {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ':use mocked Manager ' +{$I %LINE%});{$endif}
-    TSTControlManager.RegisterControl(Self as IPSECControlInterface);
+    TSTControlManager.RegisterControl(Self as ISecureControlInterface);
     FTST_IsMockControlManager:= True; // Is Mock
   end;
 end;
@@ -101,7 +101,7 @@ end;
 destructor TMockSecureControl.Destroy;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  TSTControlManager.UnRegisterControl(Self as IPSECControlInterface);
+  TSTControlManager.UnRegisterControl(Self as ISecureControlInterface);
   inherited Destroy;
 end;
 
@@ -113,7 +113,7 @@ begin
   if Trim(AValue)='' then
     CanBeAccessed(true)
   else
-    TSTControlManager.SetControlSecurityCode(FSecurityCode,AValue,(Self as IPSECControlInterface));
+    {TSTControlManager.}SetControlSecurityCode(FSecurityCode,AValue,(Self as ISecureControlInterface));
   FSecurityCode:=AValue;
 end;
 

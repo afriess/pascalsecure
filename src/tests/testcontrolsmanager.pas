@@ -63,11 +63,11 @@ var
 begin
   AssertNotNull('Not correct created object',DUT);
   CntrlA:= nil;
-  TMockSecureControl.TSTControlSecurityManager:= DUT;
+  TMockSecureControl.TSTControlManager:= DUT;
   AssertEquals('DUT RegisterControlCount',DUT.RegisterControlCount,0);
   CntrlA:= TMockSecureControl.Create(nil);
   AssertNotNull('Not correct created object',CntrlA);
-  AssertSame('DUT in Cntrl',DUT,CntrlA.TSTControlSecurityManager);
+  AssertSame('DUT in Cntrl',DUT,CntrlA.TSTControlManager);
   AssertEquals('DUT RegisterControlCount after controladd',DUT.RegisterControlCount,1);
   AssertEquals('GetControlSecurityCode wrong result',CntrlA.GetControlSecurityCode,'');
   CntrlA.SecurityCode:='xAxA';
@@ -87,7 +87,7 @@ begin
   CntrlA.CanBeAccessed(True);
   AssertEquals('inherited Enabled wrong result True/True',CntrlA.TSTIsEnabledInherited,True);
   CntrlA.Free;
-  TMockSecureControl.TSTControlSecurityManager:= nil;
+  TMockSecureControl.TSTControlManager:= nil;
 end;
 
 initialization

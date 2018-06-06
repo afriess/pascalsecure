@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="10"/>
+    <Version Value="11"/>
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
@@ -18,9 +18,10 @@
       <Version Value="2"/>
     </PublishOptions>
     <RunParams>
-      <local>
-        <FormatVersion Value="1"/>
-      </local>
+      <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default"/>
+      </Modes>
     </RunParams>
     <RequiredPackages Count="5">
       <Item1>
@@ -39,7 +40,7 @@
         <PackageName Value="FCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="5">
+    <Units Count="3">
       <Unit0>
         <Filename Value="GUITest_Common.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -50,20 +51,10 @@
         <UnitName Value="TestSecurityManagerSchema"/>
       </Unit1>
       <Unit2>
-        <Filename Value="testbasicusermanagement.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="TestBasicUserManagement"/>
-      </Unit2>
-      <Unit3>
         <Filename Value="testcontrolsmanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="TestControlsManager"/>
-      </Unit3>
-      <Unit4>
-        <Filename Value="mocksecurecontrol.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="MockSecureControl"/>
-      </Unit4>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

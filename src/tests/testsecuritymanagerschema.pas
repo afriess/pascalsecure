@@ -1,6 +1,6 @@
 unit TestSecurityManagerSchema;
 
-{$mode objfpc}{$H+}
+{$I PSECinclude.inc}
 
 interface
 
@@ -84,7 +84,7 @@ var
   ASchema: TUsrMgntSchema;
 begin
   // Now create a new one
-  ASchema:=TUsrLevelMgntSchema.Create(1, 100, 1);
+  ASchema:=TUsrLevelMgntSchema.Create(1, 100, 1, nil);
   try
     AssertTrue('UsrMgntType not correct', (ASchema.UsrMgntType = TUsrMgntType.umtLevel) );
     AssertTrue('TUsrLevelMgntSchema is not correct set', (ASchema is TUsrLevelMgntSchema));
@@ -98,7 +98,7 @@ var
   ASchema: TUsrMgntSchema;
 begin
   // Now create a new one
-  ASchema:=TUsrLevelMgntSchema.Create(1, 100, 1);
+  ASchema:=TUsrLevelMgntSchema.Create(1, 100, 1, nil);
   try
     AssertTrue('TUsrLevelMgntSchema is not correct set', (ASchema is TUsrLevelMgntSchema));
     AssertNotNull('userlist is not valid',TUsrLevelMgntSchema(ASchema).UserList);
