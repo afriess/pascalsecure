@@ -36,7 +36,7 @@ begin
   // *** Usermanagment ***
   UserMgmt:= TUserCustomizedUserManagement.Create(nil);
   // Create a authentication based Usermanagment
-  ASchema:= TUsrLevelMgntSchema.Create(1, 100, 1);
+  ASchema:= TUsrLevelMgntSchema.Create(1, 100, 1, UserMgmt);
   { TODO  : Simplify this to avoid potential errors }
   with ASchema do begin
     UserList.Add(0,TUserWithLevelAccess.Create(0,'root','1','Main administrator',false, 1));

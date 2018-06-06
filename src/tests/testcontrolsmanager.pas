@@ -1,6 +1,6 @@
 unit TestControlsManager;
 
-{$mode objfpc}{$H+}
+{$I PSECinclude.inc}
 
 interface
 

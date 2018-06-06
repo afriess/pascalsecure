@@ -190,9 +190,10 @@ begin
   inherited Create(AOwner);
 
   if GetControlSecurityManager.UserManagement=nil then
-    GetControlSecurityManager.UserManagement:=Self
-  else
-    raise EUserManagementIsSet.Create;
+    GetControlSecurityManager.UserManagement:=Self;
+  { TODO -oAndi : Why raising a Exception ? }
+  //else
+  //  raise EUserManagementIsSet.Create;
 
   FLoggedUser:=false;
   FCurrentUserName:='';
