@@ -1,6 +1,6 @@
 unit TestSecurityManagerSchema;
 
-{$mode objfpc}{$H+}
+{$I PSECinclude.inc}
 
 interface
 

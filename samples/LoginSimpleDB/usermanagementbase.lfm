@@ -1,0 +1,8 @@
+object UserManagement: TUserManagement
+  OldCreateOrder = False
+  Height = 216
+  HorizontalOffset = 347
+  VerticalOffset = 280
+  Width = 320
+  PPI = 96
+end

@@ -1,5 +1,9 @@
 <b>PascalSECURE</b> is a securitysystem for the most popular standard controls of Lazarus
 
+Brought to you by Fabio Luis Girardi and Andreas Frieß
+
+<b>This is the stable repo.</b> If you are searching the development repo, take a look at https://github.com/afriess/pascalsecure/
+
 Every securecontrol (Button, Edit, TabSheets,...) can activated/deactivated by free defined keys. You have to write only the logic depended on your need. Database, Textfiles, API,... all is possible.
 
 These components allows you easy implement a security system on your application, GUI or console.
@@ -18,5 +22,3 @@ Improve the project modularization
 This code is under modified LGPL (see LICENSE.modifiedLGPL.txt). This means that you can link this library inside your programs for any purpose. Only the included part of the code must remain LGPL.
 
 If you make some improvements to this library, please create a new issue and attach the patch of your changes.
-
-Contact : fabio at pascalscada dot com

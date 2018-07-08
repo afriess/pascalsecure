@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="10"/>
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="LoginLvlBased"/>
+      <Title Value="LoginSimpleDB"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
     </General>
@@ -17,11 +17,10 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="LoginLvlBased"/>
+            <Filename Value="LoginSimpleDB"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="..\..\src\common"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -49,85 +48,58 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="--debug-log=log.txt"/>
+        <FormatVersion Value="1"/>
       </local>
-      <FormatVersion Value="2"/>
-      <Modes Count="1">
-        <Mode0 Name="default">
-          <local>
-            <CommandLineParams Value="--debug-log=log.txt"/>
-          </local>
-        </Mode0>
-      </Modes>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="3">
       <Item1>
         <PackageName Value="pascalsecure_visual"/>
       </Item1>
       <Item2>
-        <PackageName Value="LCL"/>
+        <PackageName Value="pascalsecure"/>
       </Item2>
+      <Item3>
+        <PackageName Value="LCL"/>
+      </Item3>
     </RequiredPackages>
-    <Units Count="11">
+    <Units Count="4">
       <Unit0>
-        <Filename Value="LoginLvlBased.lpr"/>
+        <Filename Value="LoginSimpleDB.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="frmmainlvl.pas"/>
+        <Filename Value="mainloginsimpledb.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="FormAuthBased"/>
+        <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="mainLoginSimpleDB"/>
       </Unit1>
       <Unit2>
-        <Filename Value="ubuildschemalvl.pas"/>
+        <Filename Value="usermanagbuff_sql.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="UserManagementSQL"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
+        <UnitName Value="userManagBuff_sql"/>
       </Unit2>
       <Unit3>
-        <Filename Value="..\..\src\common\security.manager.schema.pas"/>
+        <Filename Value="usermanagementbase.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="UserManagement"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
       </Unit3>
-      <Unit4>
-        <Filename Value="..\..\src\common\security.manager.controls_manager.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit4>
-      <Unit5>
-        <Filename Value="..\..\src\common\security.manager.basic_user_management.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="..\..\src\common\security.manager.custom_user_management.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit6>
-      <Unit7>
-        <Filename Value="..\..\src\common\security.manager.custom_usrmgnt_interface.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit7>
-      <Unit8>
-        <Filename Value="..\..\src\common\security.manager.securecontrolinterface.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="security.manager.SecureControlInterface"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="..\..\src\common\security.include.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit9>
-      <Unit10>
-        <Filename Value="..\..\src\graphical\security.securemanager.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="LoginLvlBased"/>
+      <Filename Value="LoginSimpleDB"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\..\src\common;..\..\src\graphical"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -157,9 +129,6 @@
         </Win32>
       </Options>
     </Linking>
-    <Other>
-      <CustomOptions Value="-dDebugLevelSchemaOnly"/>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

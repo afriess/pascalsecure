@@ -1,6 +1,6 @@
-unit security.manager.SecureControlInterface;
+unit PSECInterfaces;
 
-{$mode objfpc}{$H+}
+{$I PSECinclude.inc}
 
 interface
 

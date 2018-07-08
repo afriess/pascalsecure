@@ -1,32 +1,33 @@
-unit security.manager.controls_manager;
+unit PSECcontrolsManager;
 
-{$I security.include.inc}
+{$I PSECinclude.inc}
 
 interface
 
 uses
   Classes, SysUtils, fgl,
+  PSECInterfaces;
   {security.manager.basic_user_management,}
-  security.manager.SecureControlInterface;
+  //security.manager.SecureControlInterface;
 
 type
 
-  TFPGSecureControlsList = specialize TFPGList<ISecureControlInterface>;
+  TPSECControlsList = specialize TFPGList<ISecureControlInterface>;
 
   // forward
-  TCustomBasicSecureManager = class;
-  TBasicSecureManager = class;
+  TPSECCustomBasicSecureManager = class;
+  TPSECBasicSecureManager = class;
 
 
-  { TControlSecurityManager } // Is a singleton, because we can only have one
+  { TPSECControlSecurityManager } // Is a singleton, because we can only have one
 
-  TControlSecurityManager  = class(TObject)
+  TPSECControlSecurityManager  = class(TObject)
   private
-    function GetSecureManager: TBasicSecureManager;
-    procedure SetSecureManager(AValue: TBasicSecureManager);
+    function GetSecureManager: TPSECBasicSecureManager;
+    procedure SetSecureManager(AValue: TPSECBasicSecureManager);
   protected
-    FSecureControls:TFPGSecureControlsList;
-    FSecureManager: TBasicSecureManager;
+    FSecureControls:TPSECControlsList;
+    FSecureManager: TPSECBasicSecureManager;
   public
     constructor Create;
     destructor Destroy; override;
@@ -38,25 +39,25 @@ type
                     var CurrentSecurityCode: String;
                     const NewSecurityCode: String;
                     aControl: ISecureControlInterface); virtual;
-    property   SecureManager: TBasicSecureManager read GetSecureManager write SetSecureManager;
+    property   SecureManager: TPSECBasicSecureManager read GetSecureManager write SetSecureManager;
   end;
 
-  { TCustomBasicSecureManager }
+  { TPSECCustomBasicSecureManager }
 
-  TCustomBasicSecureManager = class(TComponent)
+  TPSECCustomBasicSecureManager = class(TComponent)
   public
-    CSM : TControlSecurityManager;
+    CSM : TPSECControlSecurityManager;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   end;
 
-  { TBasicSecureManager }
-  TBasicSecureManager = class(TCustomBasicSecureManager)
+  { TPSECBasicSecureManager }
+  TPSECBasicSecureManager = class(TPSECCustomBasicSecureManager)
   end;
 
-  { TCustomUserSecureManager }
+  { TPSECCustomUserSecureManager }
 
-  TCustomUserSecureManager = class(TBasicSecureManager, ISecureManager)
+  TPSECCustomUserSecureManager = class(TPSECBasicSecureManager, ISecureManager)
   protected
     FUserManagement:TBasicUserManagement;
   protected
@@ -72,7 +73,7 @@ type
     destructor Destroy; override;
   end;
 
-  TUserSecureManager = class(TCustomUserSecureManager)
+  TUserSecureManager = class(TPSECCustomUserSecureManager)
   published
     property   UserManagement;
   end;
@@ -106,7 +107,7 @@ type
 
 
 
-function  GetControlSecurityManager: TControlSecurityManager;
+function  GetPSECManager: TPSECControlSecurityManager;
 { TODO -oAndi : Should be replaced by GetControlSecuritymanager.SetControlSecurityCode in the components}
 //procedure SetControlSecurityCode(var CurrentSecurityCode:String; const NewSecurityCode:String; ControlSecurityIntf:ISecureControlInterface);
 
@@ -118,9 +119,9 @@ uses
 
 
 var
- CSM: TControlSecurityManager;
+ CSM: TPSECControlSecurityManager;
 
-function GetControlSecurityManager: TControlSecurityManager;
+function GetPSECManager: TPSECControlSecurityManager;
 begin
   Result:= CSM;
 end;
@@ -128,17 +129,17 @@ end;
 procedure SetControlSecurityCode(var CurrentSecurityCode: String;
   const NewSecurityCode: String; ControlSecurityIntf: ISecureControlInterface);
 begin
-  GetControlSecurityManager.SetControlSecurityCode(CurrentSecurityCode, NewSecurityCode, ControlSecurityIntf);
+  GetPSECManager.SetControlSecurityCode(CurrentSecurityCode, NewSecurityCode, ControlSecurityIntf);
 end;
 
-{ TCustomUserSecureManager }
+{ TPSECCustomUserSecureManager }
 
-function TCustomUserSecureManager.GetUserManagement: TBasicUserManagement;
+function TPSECCustomUserSecureManager.GetUserManagement: TBasicUserManagement;
 begin
   Result:= FUserManagement;
 end;
 
-procedure TCustomUserSecureManager.SetUserManagement(
+procedure TPSECCustomUserSecureManager.SetUserManagement(
   aUserManagment: TBasicUserManagement);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
@@ -157,31 +158,31 @@ begin
   //  //UpdateControls;
 end;
 
-procedure TCustomUserSecureManager.SetControlSecurityCode(
+procedure TPSECCustomUserSecureManager.SetControlSecurityCode(
   var CurrentSecurityCode: String; const NewSecurityCode: String;
   aControl: ISecureControlInterface);
 begin
 
 end;
 
-constructor TCustomUserSecureManager.Create(AOwner: TComponent);
+constructor TPSECCustomUserSecureManager.Create(AOwner: TComponent);
 begin
   Inherited Create(AOwner);
 end;
 
-destructor TCustomUserSecureManager.Destroy;
+destructor TPSECCustomUserSecureManager.Destroy;
 begin
   inherited Destroy;
 end;
 
-{ TControlSecurityManager }
+{ TPSECControlSecurityManager }
 
-function TControlSecurityManager.GetSecureManager: TBasicSecureManager;
+function TPSECControlSecurityManager.GetSecureManager: TPSECBasicSecureManager;
 begin
   Result:= FSecureManager;
 end;
 
-procedure TControlSecurityManager.SetSecureManager(AValue: TBasicSecureManager);
+procedure TPSECControlSecurityManager.SetSecureManager(AValue: TPSECBasicSecureManager);
 begin
   if FSecureManager = AValue then
     exit; // ==>>
@@ -193,16 +194,16 @@ begin
   UpdateControls;
 end;
 
-constructor TControlSecurityManager.Create;
+constructor TPSECControlSecurityManager.Create;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited create;
   FSecureControls:= TFPGSecureControlsList.Create;
-  FSecureManager:= TBasicSecureManager.Create(nil);
+  FSecureManager:= TPSECBasicSecureManager.Create(nil);
   FSecureManager.CSM:= self;
 end;
 
-destructor TControlSecurityManager.Destroy;
+destructor TPSECControlSecurityManager.Destroy;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FreeAndNil(FSecureControls);
@@ -211,7 +212,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TControlSecurityManager.RegisterControl(
+procedure TPSECControlSecurityManager.RegisterControl(
   aControl: ISecureControlInterface);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
@@ -223,7 +224,7 @@ begin
   end;
 end;
 
-procedure TControlSecurityManager.UnRegisterControl(
+procedure TPSECControlSecurityManager.UnRegisterControl(
   aControl: ISecureControlInterface);
 var
   idx: LongInt;
@@ -234,7 +235,7 @@ begin
     FSecureControls.Delete(idx);
 end;
 
-procedure TControlSecurityManager.SetControlSecurityCode(
+procedure TPSECControlSecurityManager.SetControlSecurityCode(
   var CurrentSecurityCode: String; const NewSecurityCode: String;
   aControl: ISecureControlInterface);
 begin
@@ -259,7 +260,7 @@ begin
 
 end;
 
-procedure TControlSecurityManager.UpdateControls;
+procedure TPSECControlSecurityManager.UpdateControls;
 var
   c:LongInt;
   aControl: ISecureControlInterface;
@@ -272,24 +273,24 @@ begin
   end;
 end;
 
-function TControlSecurityManager.Count: Integer;
+function TPSECControlSecurityManager.Count: Integer;
 begin
   Result:= FSecureControls.Count;
 end;
 
-{ TCustomBasicSecureManager }
+{ TPSECCustomBasicSecureManager }
 
-//function TCustomBasicSecureManager.GetControlSecurityManagerExt: TControlSecurityManager;
+//function TPSECCustomBasicSecureManager.GetControlSecurityManagerExt: TPSECControlSecurityManager;
 //begin
-//  Result:= GetControlSecurityManager;
+//  Result:= GetPSECManager;
 //end;
 //
-//function TCustomBasicSecureManager.GetUserManagement: TBasicUserManagement;
+//function TPSECCustomBasicSecureManager.GetUserManagement: TBasicUserManagement;
 //begin
 //  Result:= FUserManagement;
 //end;
 //
-//procedure TCustomBasicSecureManager.SetUserManagement(aUserManagment: TBasicUserManagement);
+//procedure TPSECCustomBasicSecureManager.SetUserManagement(aUserManagment: TBasicUserManagement);
 //begin
 //  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
 //  //if (aUserManagment<>nil) and (not (aUserManagment is TBasicUserManagement)) then
@@ -304,13 +305,13 @@ end;
 //  //UpdateControls;
 //end;
 
-constructor TCustomBasicSecureManager.Create(AOwner: TComponent);
+constructor TPSECCustomBasicSecureManager.Create(AOwner: TComponent);
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Create(AOwner);
 end;
 
-destructor TCustomBasicSecureManager.Destroy;
+destructor TPSECCustomBasicSecureManager.Destroy;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   inherited Destroy;
@@ -326,17 +327,17 @@ end;
 //FreeAndNil(FSecureControls);
 
 
-//procedure TCustomBasicSecureManager.UpdateControls;
+//procedure TPSECCustomBasicSecureManager.UpdateControls;
 //begin
 //
 //end;
 //
-//procedure TCustomBasicSecureManager.RegisterControl(aControl: ISecureControlInterface);
+//procedure TPSECCustomBasicSecureManager.RegisterControl(aControl: ISecureControlInterface);
 //begin
 //
 //end;
 
-//procedure TCustomBasicSecureManager.UnRegisterControl(aControl: ISecureControlInterface);
+//procedure TPSECCustomBasicSecureManager.UnRegisterControl(aControl: ISecureControlInterface);
 //begin
 //  {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
 //end;
@@ -355,7 +356,7 @@ end;
 
 initialization
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
-  CSM:= TControlSecurityManager.create;
+  CSM:= TPSECControlSecurityManager.create;
 
 finalization
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
