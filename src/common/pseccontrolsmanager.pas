@@ -144,8 +144,8 @@ destructor TPSECControlManager.Destroy;
 begin
   {$ifdef debug_secure}Debugln({$I %FILE%} + '->' +{$I %CURRENTROUTINE%} + ' ' +{$I %LINE%});{$endif}
   FreeAndNil(FSecureControls);
-  //if FSecureManager <> nil then
-  //  FreeAndNil(FSecureManager);
+  if FSecureManager <> nil then
+    FreeAndNil(FSecureManager);
   inherited Destroy;
 end;
 

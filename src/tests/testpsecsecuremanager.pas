@@ -56,9 +56,10 @@ end;
 
 procedure TTestSecureManager.TearDown;
 begin
-  if DUT_CM.SecureManager <> nil then begin
-    DUT_CM.SecureManager := nil;
-  end;
+  //if DUT_CM.SecureManager <> nil then begin
+  //  DUT_CM.SecureManager.free; // := nil;
+  //  DUT_CM := nil;
+  //end;
   FreeAndNil(DUT_CM);
 end;
 
