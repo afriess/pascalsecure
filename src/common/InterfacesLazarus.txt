@@ -1,0 +1,43 @@
+
+
+On Sunday 18 February 2018 13:16:36 Andreas Friec39f via Lazarus wrote:
+> Now i have inserted code in the TIntfComp to remove the link to the
+> interface
+>
+> --------------------
+>
+> destructor TIntfComp.Destroy;
+> begin
+>    FObjectHasInterface := nil;  // <<-- Crahe here now
+>    inherited Destroy;
+> end;
+> --------------------
+>
+> And now i it crash explicitly  at the line wher i try to 'unlink'. And
+> the Callstack from Lazarus give me some information. The setting to nil,
+> call fpc_intf_assign and  call IUnknown(D)._Release. But this is
+> absolutly unwated (and unexpected) for me here.
+>
+I did not read the whole thread.
+If you want to set a COM interface pointer to nil without calling _release() 
+use 
+"
+ pointer(FObjectHasInterface):= nil;
+"
+It is very difficult or even impossible in Delphi and FPC to reliable mix 
+reference counted COM interfaces with TComponent/TObject life cycle 
+management. If you need interfaces without reference counting use CORBA 
+interfaces.
+Never use COM-interface variables if there are TObject.Destroy() calls. It is 
+an undefined "implementation detail" when the interface variable goes out of 
+scope, there is a risk that it goes out of scope and _release() will be 
+called after the according object has been destroyed by a TObject.Destroy() 
+call.
+
+Martin
+-- 
+_______________________________________________
+Lazarus mailing list
+Lazarus@lists.lazarus-ide.org
+https://lists.lazarus-ide.org/listinfo/lazarus
+

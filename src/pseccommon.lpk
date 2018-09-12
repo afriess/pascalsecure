@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="4">
+    <PathDelim Value="\"/>
+    <Name Value="PSECCommon"/>
+    <Type Value="RunAndDesignTime"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <IncludeFiles Value="common"/>
+        <OtherUnitFiles Value="common"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <Other>
+        <CustomOptions Value="-ddebug_secure"/>
+      </Other>
+    </CompilerOptions>
+    <Files Count="10">
+      <Item1>
+        <Filename Value="common\pseccontrolsmanager.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="PSECcontrolsManager"/>
+      </Item1>
+      <Item2>
+        <Filename Value="common\psecexceptions.pas"/>
+        <UnitName Value="PSECExceptions"/>
+      </Item2>
+      <Item3>
+        <Filename Value="common\PSECinclude.inc"/>
+        <Type Value="Include"/>
+      </Item3>
+      <Item4>
+        <Filename Value="common\psecinterfaces.pas"/>
+        <UnitName Value="PSECInterfaces"/>
+      </Item4>
+      <Item5>
+        <Filename Value="common\psecsecureauthmanager.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="PSECSecureAuthManager"/>
+      </Item5>
+      <Item6>
+        <Filename Value="common\psecsecurelevelmanager.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="PSECSecureLevelManager"/>
+      </Item6>
+      <Item7>
+        <Filename Value="common\psecsecuremanager.pas"/>
+        <UnitName Value="PSECSecureManager"/>
+      </Item7>
+      <Item8>
+        <Filename Value="common\psectexts.pas"/>
+        <UnitName Value="PSECTexts"/>
+      </Item8>
+      <Item9>
+        <Filename Value="common\psecuserschema.pas"/>
+        <UnitName Value="PSECUserSchema"/>
+      </Item9>
+      <Item10>
+        <Filename Value="common\psecbasic_user_management.pas"/>
+        <UnitName Value="PSECBasic_user_management"/>
+      </Item10>
+    </Files>
+    <RequiredPkgs Count="2">
+      <Item1>
+        <PackageName Value="LazUtils"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+      </Item2>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+    <CustomOptions Items="ExternHelp" Version="2">
+      <_ExternHelp Items="Count"/>
+    </CustomOptions>
+  </Package>
+</CONFIG>
