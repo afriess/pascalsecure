@@ -34,7 +34,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="13">
       <Unit0>
         <Filename Value="GUITests.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -90,20 +90,15 @@
         <UnitName Value="TestPSECAuthUserschema"/>
       </Unit10>
       <Unit11>
-        <Filename Value="mocksecurecontrol.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="MockSecureControl"/>
-      </Unit11>
-      <Unit12>
         <Filename Value="testpsecuserauthcomplete.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="TestPSECUserAuthComplete"/>
-      </Unit12>
-      <Unit13>
+      </Unit11>
+      <Unit12>
         <Filename Value="..\common\psecauthusermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="PSECAuthUserManager"/>
-      </Unit13>
+      </Unit12>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
